@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Δημιουργία Βοηθού</title>
+  <style>
+    body{font-family:Arial,sans-serif;background-color:#f0f2f5;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;transition:background-color .5s ease}
+    .form-container{background:#fff;padding:40px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.1);width:100%;max-width:600px;box-sizing:border-box;position:relative}
+    h2{color:#2e7d32;text-align:center;margin-bottom:20px}
+    label{display:block;margin-top:15px;margin-bottom:5px;font-weight:bold;color:#4caf50}
+    input[type="text"],input[type="url"],textarea,input[type="file"],select{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;font-size:16px;transition:border-color .3s}
+    input:focus,textarea:focus,select:focus{border-color:#4caf50;outline:none}
+    textarea{resize:vertical;min-height:100px}
+    .form-page{display:none;animation:fadeIn .5s ease-in-out}
+    .form-page.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    button{background:#4caf50;color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:16px;margin-top:20px;transition:background-color .3s}
+    button:hover{background:#388e3c}
+    .button-group{display:flex;justify-content:space-between;gap:10px}
+    .button-group button{flex:1}
+    .prev-btn{background:#616161}
+    .prev-btn:hover{background:#424242}
+    .steps-indicator{display:flex;justify-content:center;margin-bottom:30px}
+    .step{height:10px;width:10px;background:#ccc;border-radius:50%;margin:0 5px;transition:background-color .3s}
+    .step.active{background:#4caf50}
+    .language-switcher{position:absolute;top:20px;right:20px}
+    .lang-btn{background:#e0e0e0;color:#333;padding:8px 12px;border:1px solid #ccc;border-radius:5px;cursor:pointer;font-size:14px;transition:background-color .3s}
+    .lang-btn.active{background:#4caf50;color:#fff}
+    .thank-you-page{display:none;text-align:center;animation:fadeIn .5s ease-in-out}
+    .thank-you-page h2{font-size:2.2em;color:#4caf50}
+    .thank-you-page p{font-size:1.1em;color:#555}
+    input.invalid, select.invalid, textarea.invalid{border-color:#d32f2f; box-shadow:0 0 0 2px rgba(211,47,47,.12)}
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <!-- Fallback χωρίς JS -->
+    <form id="assistant-form"
+          action="/create-assistant"
+          method="post"
+          enctype="multipart/form-data"
+          novalidate>
+
+      <div class="steps-indicator">
+        <span class="step active"></span>
+        <span class="step"></span>
+        <span class="step"></span>
+        <span class="step"></span>
+      </div>
+
+      <!-- Βήμα 1 (EL) -->
+      <div class="form-page active" data-lang="el">
+        <h2>Βασικές Πληροφορίες</h2>
+        <label for="company-name-el">Πώς λέγεται η εταιρεία σας;</label>
+        <input type="text" id="company-name-el" name="companyName" placeholder="π.χ. Google" required>
+
+        <label for="industry-el">Σε ποια βιομηχανία δραστηριοποιήστε;</label>
+        <select id="industry-el" name="industry" required>
+          <option value="">Επιλέξτε βιομηχανία...</option>
+          <option value="Τεχνολογία">Τεχνολογία</option>
+          <option value="Λιανικό Εμπόριο">Λιανικό Εμπόριο</option>
+          <option value="Υγεία">Υγεία</option>
+          <option value="Εκπαίδευση">Εκπαίδευση</option>
+          <option value="Χρηματοοικονομικά">Χρηματοοικονομικά</option>
+          <option value="Τουρισμός">Τουρισμός</option>
+          <option value="Μεταφορές">Μεταφορές</option>
+          <option value="Κατασκευές">Κατασκευές</option>
+          <option value="Ενέργεια">Ενέργεια</option>
+          <option value="Τρόφιμα & Ποτά">Τρόφιμα & Ποτά</option>
+          <option value="Μόδα & Ομορφιά">Μόδα & Ομορφιά</option>
+          <option value="Ψυχαγωγία">Ψυχαγωγία</option>
+          <option value="Αθλητισμός">Αθλητισμός</option>
+          <option value="Νομικές Υπηρεσίες">Νομικές Υπηρεσίες</option>
+          <option value="Συμβουλευτικές Υπηρεσίες">Συμβουλευτικές Υπηρεσίες</option>
+          <option value="Άλλο">Άλλο</option>
+        </select>
+        <input type="text" id="industry-other-el" name="industryOther" placeholder="Παρακαλώ προσδιορίστε..." style="display:none;margin-top:10px;">
+
+        <label for="website-el">Ποια είναι η ιστοσελίδα σας;</label>
+        <input type="url" id="website-el" name="websiteURL" placeholder="π.χ. https://www.example.com" required>
+
+        <button type="button" class="next-btn">Επόμενο</button>
+      </div>
+
+      <!-- Βήμα 1 (EN) -->
+      <div class="form-page" data-lang="en">
+        <h2>Basic Information</h2>
+        <label for="company-name-en">What's your company name?</label>
+        <input type="text" id="company-name-en" name="companyName" placeholder="e.g. Google" required>
+
+        <label for="industry-en">What industry are you in?</label>
+        <select id="industry-en" name="industry" required>
+          <option value="">Select industry...</option>
+          <option value="Technology">Technology</option>
+          <option value="Retail">Retail</option>
+          <option value="Healthcare">Healthcare</option>
+          <option value="Education">Education</option>
+          <option value="Finance">Finance</option>
+          <option value="Tourism">Tourism</option>
+          <option value="Transportation">Transportation</option>
+          <option value="Construction">Construction</option>
+          <option value="Energy">Energy</option>
+          <option value="Food & Beverage">Food & Beverage</option>
+          <option value="Fashion & Beauty">Fashion & Beauty</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Sports">Sports</option>
+          <option value="Legal Services">Legal Services</option>
+          <option value="Consulting">Consulting</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="industry-other-en" name="industryOther" placeholder="Please specify..." style="display:none;margin-top:10px;">
+
+        <label for="website-en">What's your website URL?</label>
+        <input type="url" id="website-en" name="websiteURL" placeholder="e.g. https://www.example.com" required>
+
+        <button type="button" class="next-btn">Next</button>
+      </div>
+
+      <!-- Βήμα 2 (EL) -->
+      <div class="form-page" data-lang="el">
+        <h2>Πες μας για την εταιρεία σου</h2>
+        <label for="description-el">Πώς θα περιέγραφες την εταιρεία σου;</label>
+        <textarea id="description-el" name="description" placeholder="π.χ. Η εταιρεία μας βοηθά..." required></textarea>
+
+        <label for="questions-el">Συγκεκριμένες ερωτήσεις προς χρήστες;</label>
+        <textarea id="questions-el" name="questions" placeholder="π.χ. Πώς ήταν η εμπειρία σας;" required></textarea>
+
+        <div class="button-group">
+          <button type="button" class="prev-btn">Πίσω</button>
+          <button type="button" class="next-btn">Επόμενο</button>
+        </div>
+      </div>
+
+      <!-- Βήμα 2 (EN) -->
+      <div class="form-page" data-lang="en">
+        <h2>Tell Us About Your Company</h2>
+        <label for="description-en">How would you describe your company?</label>
+        <textarea id="description-en" name="description" placeholder="e.g. Our company helps..." required></textarea>
+
+        <label for="questions-en">Specific questions to ask users?</label>
+        <textarea id="questions-en" name="questions" placeholder="e.g. How was your experience?" required></textarea>
+
+        <div class="button-group">
+          <button type="button" class="prev-btn">Back</button>
+          <button type="button" class="next-btn">Next</button>
+        </div>
+      </div>
+
+      <!-- Βήμα 3 (EL) -->
+      <div class="form-page" data-lang="el">
+        <h2>Ρυθμίσεις Συνομιλίας</h2>
+        <label for="end-message-el">Τι γίνεται στο τέλος της συνομιλίας;</label>
+        <textarea id="end-message-el" name="endMessage" placeholder="π.χ. Ευχαριστούμε..." required></textarea>
+
+        <label for="greeting-el">Πώς πρέπει να χαιρετάει ο βοηθός;</label>
+        <textarea id="greeting-el" name="greeting" placeholder="π.χ. Γεια σας, πώς μπορώ..." required></textarea>
+
+        <div class="button-group">
+          <button type="button" class="prev-btn">Πίσω</button>
+          <button type="button" class="next-btn">Επόμενο</button>
+        </div>
+      </div>
+
+      <!-- Βήμα 3 (EN) -->
+      <div class="form-page" data-lang="en">
+        <h2>Conversation Settings</h2>
+        <label for="end-message-en">What should happen at the end?</label>
+        <textarea id="end-message-en" name="endMessage" placeholder="e.g. Thanks for your time." required></textarea>
+
+        <label for="greeting-en">How should the assistant greet?</label>
+        <textarea id="greeting-en" name="greeting" placeholder="e.g. Hi, how can I help you?" required></textarea>
+
+        <div class="button-group">
+          <button type="button" class="prev-btn">Back</button>
+          <button type="button" class="next-btn">Next</button>
+        </div>
+      </div>
+
+      <!-- Βήμα 4 (EL) -->
+      <div class="form-page" data-lang="el">
+        <h2>Ανέβασμα Αρχείων</h2>
+        <p>Μπορείτε να ανεβάσετε αρχεία (προαιρετικό).</p>
+        <label for="files-upload">Επιλέξτε αρχεία (προαιρετικό):</label>
+        <input type="file" id="files-upload" name="files" multiple>
+
+        <label for="file-description-el">Λέξεις-κλειδιά:</label>
+        <textarea id="file-description-el" name="keywords" placeholder="Δώστε λέξεις-κλειδιά που σχετίζονται με την επιχείρησή σας" required></textarea>
+
+        <div class="button-group">
+          <button type="button" class="prev-btn">Πίσω</button>
+          <button type="submit" id="submit-btn">Δημιουργία Βοηθού</button>
+        </div>
+      </div>
+
+      <!-- Βήμα 4 (EN) -->
+      <div class="form-page" data-lang="en">
+        <h2>Upload Files</h2>
+        <p>You can upload files (optional).</p>
+        <label for="files-upload-en">Select files (optional):</label>
+        <input type="file" id="files-upload-en" name="files" multiple>
+
+        <label for="file-description-en">Keywords:</label>
+        <textarea id="file-description-en" name="keywords" placeholder="e.g., enter keywords related to your business" required></textarea>
+
+        <div class="button-group">
+          <button type="button" class="prev-btn">Back</button>
+          <button type="submit" id="submit-btn-en">Create Your Assistant</button>
+        </div>
+      </div>
+
+    </form>
+
+    <div class="thank-you-page" id="thank-you-page">
+      <h2>Ευχαριστούμε! 🎉</h2>
+      <p>Η φόρμα σας υποβλήθηκε με επιτυχία.</p>
+    </div>
+
+    <div class="language-switcher">
+      <button id="lang-el" class="lang-btn active">Ελληνικά</button>
+      <button id="lang-en" class="lang-btn">English</button>
+    </div>
+  </div>
+
+  <script>
+    console.log('[form] JS loaded');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('assistant-form');
+      const formPages = document.querySelectorAll('.form-page');
+      const steps = document.querySelectorAll('.step');
+      const nextButtons = document.querySelectorAll('.next-btn');
+      const prevButtons = document.querySelectorAll('.prev-btn');
+      const langButtons = document.querySelectorAll('.lang-btn');
+      const thankYouPage = document.getElementById('thank-you-page');
+
+      const industrySelectEl = document.getElementById('industry-el');
+      const industrySelectEn = document.getElementById('industry-en');
+      const industryOtherEl = document.getElementById('industry-other-el');
+      const industryOtherEn = document.getElementById('industry-other-en');
+
+      if (industrySelectEl) {
+        industrySelectEl.addEventListener('change', function(){
+          if (this.value === 'Άλλο') { industryOtherEl.style.display='block'; industryOtherEl.required=true; }
+          else { industryOtherEl.style.display='none'; industryOtherEl.required=false; industryOtherEl.value=''; }
+        });
+      }
+      if (industrySelectEn) {
+        industrySelectEn.addEventListener('change', function(){
+          if (this.value === 'Other') { industryOtherEn.style.display='block'; industryOtherEn.required=true; }
+          else { industryOtherEn.style.display='none'; industryOtherEn.required=false; industryOtherEn.value=''; }
+        });
+      }
+
+      document.querySelectorAll('input, textarea, select').forEach(el=>{
+        el.addEventListener('input', ()=> el.classList.remove('invalid'));
+        el.addEventListener('change', ()=> el.classList.remove('invalid'));
+      });
+
+      let currentPage = 0;    // 0..3
+      let currentLang = 'el'; // 'el' | 'en'
+
+      const showPage = () => {
+        formPages.forEach(page => {
+          const pageLang = page.getAttribute('data-lang');
+          const pageIndex = Math.floor(Array.from(formPages).indexOf(page) / 2);
+          const isActive = (pageIndex === currentPage && pageLang === currentLang);
+          page.style.display = isActive ? 'block' : 'none';
+          page.classList.toggle('active', isActive);
+        });
+        steps.forEach((s, i)=> s.classList.toggle('active', i===currentPage));
+      };
+
+      const validateCurrentPage = () => {
+        const activePage = document.querySelector('.form-page.active');
+        if (!activePage) return false;
+
+        let fields = [...activePage.querySelectorAll('input[required], select[required], textarea[required]')];
+        if (currentPage === 3) fields = fields.filter(f => f.type !== 'file');
+
+        let firstInvalid = null;
+        fields.forEach(f=>{
+          const ok = (f.value ?? '').trim().length > 0;
+          f.classList.toggle('invalid', !ok);
+          if (!ok && !firstInvalid) firstInvalid = f;
+        });
+
+        const industrySelect = activePage.querySelector('select[name="industry"]');
+        if (industrySelect && (industrySelect.value === 'Άλλο' || industrySelect.value === 'Other')) {
+          const otherInput = activePage.querySelector('input[name="industryOther"]');
+          const ok = otherInput && (otherInput.value ?? '').trim().length > 0;
+          if (!ok) { otherInput.classList.add('invalid'); if (!firstInvalid) firstInvalid = otherInput; }
+          else { otherInput.classList.remove('invalid'); }
+        }
+
+        if (firstInvalid) {
+          firstInvalid.scrollIntoView({behavior:'smooth', block:'center'});
+          firstInvalid.focus();
+          return false;
+        }
+        return true;
+      };
+
+      const handleNext = () => {
+        if (!validateCurrentPage()) {
+          alert(currentLang==='el' ? 'Παρακαλώ συμπληρώστε όλα τα πεδία για να συνεχίσετε.' : 'Please fill in all fields to continue.');
+          return;
+        }
+        if (currentPage < 3) { currentPage++; showPage(); }
+      };
+      const handlePrev = () => { if (currentPage > 0) { currentPage--; showPage(); } };
+
+      nextButtons.forEach(btn => btn.addEventListener('click', handleNext));
+      prevButtons.forEach(btn => btn.addEventListener('click', handlePrev));
+
+      const handleLanguageChange = (lang) => {
+        currentLang = lang;
+        langButtons.forEach(b=>b.classList.remove('active'));
+        document.getElementById(`lang-${lang}`).classList.add('active');
+        showPage();
+      };
+      langButtons.forEach(button=>{
+        button.addEventListener('click', (e)=>handleLanguageChange(e.target.id.replace('lang-','')));
+      });
+
+      // ===== Υποβολή =====
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('[submit] start');
+
+        if (!validateCurrentPage()) {
+          console.warn('[submit] validation failed on page', currentPage, 'lang', currentLang);
+          alert(currentLang==='el'
+            ? 'Παρακαλώ συμπληρώστε όλα τα πεδία για να συνεχίσετε.'
+            : 'Please fill in all fields to continue.');
+          return;
+        }
+
+        const formData = new FormData();
+
+        function pickValueByName(name) {
+          const candidates = [...form.querySelectorAll(`[name="${name}"]`)];
+          if (!candidates.length) return '';
+          const preferred = candidates.find(i => i.id?.endsWith(currentLang)) || candidates[0];
+          const other     = candidates.find(i => !i.id?.endsWith(currentLang));
+          return (preferred?.value || '').trim() || (other?.value || '').trim() || '';
+        }
+
+        function getIndustryValue() {
+          const selCandidates = [...form.querySelectorAll('select[name="industry"]')];
+          const selPreferred  = selCandidates.find(i => i.id?.endsWith(currentLang)) || selCandidates[0];
+          let val = (selPreferred?.value || '').trim();
+          if (val === 'Άλλο' || val === 'Other' || !val) {
+            const otherCandidates = [...form.querySelectorAll('input[name="industryOther"]')];
+            const otherPreferred  = otherCandidates.find(i => i.id?.endsWith(currentLang)) || otherCandidates[0];
+            const otherVal = (otherPreferred?.value || '').trim();
+            if (otherVal) val = otherVal;
+          }
+          return val;
+        }
+
+        const requiredNames = ['companyName','websiteURL','description','questions','endMessage','greeting','keywords'];
+        requiredNames.forEach(n => {
+          const v = pickValueByName(n);
+          if (v) formData.set(n, v);
+        });
+
+        const industryVal = getIndustryValue();
+        if (industryVal) formData.set('industry', industryVal);
+
+        const fileInput = document.querySelector('.form-page.active input[type="file"]');
+        if (fileInput && fileInput.files && fileInput.files.length) {
+          for (let i = 0; i < fileInput.files.length; i++) formData.append('files', fileInput.files[i]);
+        }
+
+        console.log('[submit] keys:', [...formData.keys()]);
+
+        const submitBtn = document.querySelector('.form-page.active button[type="submit"]');
+        const originalText = submitBtn?.textContent || '';
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = currentLang==='el' ? 'Δημιουργία...' : 'Creating...'; }
+
+        try {
+          const res = await fetch('/create-assistant', { method:'POST', body: formData });
+          const text = await res.text();
+          console.log('[submit] status:', res.status, text);
+
+          if (!res.ok) {
+            alert((currentLang==='el' ? 'Σφάλμα: ' : 'Error: ') + text);
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+            return;
+          }
+
+          // ===== Επιτυχία: αποθήκευση & redirect στο chatbot =====
+          let data = {};
+          try { data = JSON.parse(text); } catch { data = {}; }
+          const received = data.received || {};
+          const scraped  = data.scraped  || null;
+
+          sessionStorage.setItem('companyData', JSON.stringify({
+            received_data: received,
+            scraped: scraped
+          }));
+
+          // redirect στο chatbot (χρησιμοποιούμε companyName σαν id)
+          window.location.href = '/chatbot/' + encodeURIComponent(received.companyName || 'session');
+
+        } catch (err) {
+          console.error('[submit] fetch failed:', err);
+          alert(currentLang==='el' ? 'Προέκυψε σφάλμα κατά την υποβολή.' : 'An error occurred while submitting.');
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+        }
+      });
+
+      showPage();
+    });
+  </script>
+</body>
+</html>

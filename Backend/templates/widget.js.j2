@@ -1,0 +1,880 @@
+// ============================================================================
+// EXTERNAL LIBRARIES LOADING
+// ============================================================================
+
+/**
+ * Load marked.js library for markdown support
+ */
+(function loadMarkedLibrary() {
+    if (!window.marked) {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js';
+        script.onload = function() {
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                sanitize: false,
+                pedantic: false
+            });
+            console.log('Marked.js loaded successfully');
+        };
+        script.onerror = function() {
+            console.error('Failed to load marked.js');
+        };
+        document.head.appendChild(script);
+    }
+})();
+
+/**
+ * Load DOMPurify for secure HTML sanitization
+ */
+(function loadDOMPurify() {
+    if (!window.DOMPurify) {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.7/purify.min.js';
+        script.onload = function() {
+            console.log('DOMPurify loaded successfully');
+        };
+        script.onerror = function() {
+            console.error('Failed to load DOMPurify');
+        };
+        document.head.appendChild(script);
+    }
+})();
+
+
+// ============================================================================
+// MAIN CHAT WIDGET
+// ============================================================================
+
+(function initChatWidget() {
+    // ------------------------------------------------------------------------
+    // CONFIGURATION & CONSTANTS
+    // ------------------------------------------------------------------------
+    
+    const CONFIG = {
+        botAvatarUrl: '{{ bot_avatar }}',
+        apiKey: '{{ api_key }}',
+        apiBase: '{{ api_base }}',
+        primaryColor: '{{ primary_color }}',
+        companyDisplayName: '{{ company_display_name }}',
+        greeting: '{{ greeting }}'
+    };
+    
+    const apiKey = CONFIG.apiKey;
+    const primary_color = CONFIG.primaryColor; 
+    // ------------------------------------------------------------------------
+    // HTML TEMPLATE
+    // ------------------------------------------------------------------------
+    
+    const widgetContainer = document.createElement('div');
+    widgetContainer.id = `chatbot-widget-${CONFIG.apiKey}`;
+    widgetContainer.innerHTML = `
+        <!-- Chat Button -->
+        <div id="chat-button-${CONFIG.apiKey}" class="chat-button-${CONFIG.apiKey}">
+            💬
+        </div>
+        
+        <!-- Chat Popup -->
+        <div id="chat-popup-${CONFIG.apiKey}" class="chat-popup-${CONFIG.apiKey}" style="display: none;">
+            <div class="chat-header-${CONFIG.apiKey}">
+                <div class="header-info-${CONFIG.apiKey}">
+                    <div class="bot-avatar-header-${CONFIG.apiKey}">
+                        <span id="header-avatar-${CONFIG.apiKey}"></span>
+                    </div>
+                    <span class="bot-name-${CONFIG.apiKey}">${CONFIG.companyDisplayName}</span>
+                </div>
+                <div class="status-info-${CONFIG.apiKey}">
+                    <div class="status-dot-${CONFIG.apiKey}"></div>
+                    <span class="status-text-${CONFIG.apiKey}">Συνδεδεμένος</span>
+                </div>
+                <button id="close-chat-${CONFIG.apiKey}" class="close-btn-${CONFIG.apiKey}">×</button>
+            </div>
+            <div id="chat-messages-${CONFIG.apiKey}" class="chat-messages-${CONFIG.apiKey}">
+                <div class="message-wrapper-${CONFIG.apiKey} bot-wrapper-${CONFIG.apiKey}">
+                    <div class="bot-avatar-${CONFIG.apiKey}">
+                        ${CONFIG.botAvatarUrl 
+                            ? `<img src="${CONFIG.botAvatarUrl}" alt="Bot" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`
+                            : `<svg class="chip-icon-${CONFIG.apiKey}" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                              </svg>`
+                        }
+                    </div>
+                    <div class="bot-message-${CONFIG.apiKey}">${CONFIG.greeting}</div>
+                </div>
+            </div>
+            <div class="chat-input-container-${CONFIG.apiKey}">
+                <input type="text" id="chat-input-${CONFIG.apiKey}" placeholder="Γράψτε το μήνυμά σας..." />
+                <button id="send-btn-${CONFIG.apiKey}" class="send-btn-${CONFIG.apiKey}">
+                    <svg class="send-icon-${CONFIG.apiKey}" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(widgetContainer);
+
+    // ------------------------------------------------------------------------
+    // DYNAMIC HEADER AVATAR SETUP
+    // ------------------------------------------------------------------------
+    
+    const headerAvatar = document.getElementById(`header-avatar-${CONFIG.apiKey}`);
+    if (CONFIG.botAvatarUrl) {
+        headerAvatar.innerHTML = `<img src="${CONFIG.botAvatarUrl}" alt="Bot" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;" />`;
+    } else {
+        headerAvatar.innerHTML = `<svg class="chip-icon-${CONFIG.apiKey}" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>`;
+    }
+
+    // ------------------------------------------------------------------------
+    // CSS STYLES
+    // ------------------------------------------------------------------------
+    
+    const styles = `
+        /* Chat Button */
+        .chat-button-${CONFIG.apiKey} {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: ${CONFIG.primaryColor};
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .chat-button-${CONFIG.apiKey}:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Chat Popup */
+        .chat-popup-${CONFIG.apiKey} {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: #fafafa;
+            border-radius: 12px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .chat-header-${CONFIG.apiKey} {
+            background: ${CONFIG.primaryColor};
+            padding: 16px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .header-info-${CONFIG.apiKey} {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bot-avatar-header-${CONFIG.apiKey} {
+            width: 32px;
+            height: 32px;
+            background: ${CONFIG.primaryColor};
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chip-icon-${CONFIG.apiKey} {
+            width: 20px;
+            height: 20px;
+            color: white;
+        }
+
+        .bot-name-${CONFIG.apiKey} {
+            color: #a78bfa;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status-info-${CONFIG.apiKey} {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot-${CONFIG.apiKey} {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        .status-text-${CONFIG.apiKey} {
+            color: #10b981;
+            font-size: 12px;
+        }
+
+        .close-btn-${CONFIG.apiKey} {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn-${CONFIG.apiKey}:hover {
+            background: rgba(139, 92, 246, 0.2);
+            color: white;
+        }
+
+        /* Messages Container */
+        .chat-messages-${CONFIG.apiKey} {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-wrapper-${CONFIG.apiKey} {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .user-wrapper-${CONFIG.apiKey} {
+            flex-direction: row-reverse;
+        }
+
+        /* Avatars */
+        .bot-avatar-${CONFIG.apiKey}, 
+        .user-avatar-${CONFIG.apiKey} {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .bot-avatar-${CONFIG.apiKey} {
+            background: ${CONFIG.primaryColor};
+        }
+
+        .user-avatar-${CONFIG.apiKey} {
+            background: #475569;
+        }
+
+        /* Message Bubbles */
+        .bot-message-${CONFIG.apiKey}, 
+        .user-message-${CONFIG.apiKey} {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 240px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .bot-message-${CONFIG.apiKey} {
+            background: #f1f5f9;
+            color: #1e293b;
+            border-radius: 12px 12px 12px 4px;
+        }
+
+        .user-message-${CONFIG.apiKey} {
+            background: ${CONFIG.primaryColor};
+            color: white;
+            border-radius: 12px 12px 4px 12px;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator-${CONFIG.apiKey} {
+            display: none;
+            padding: 12px 16px;
+            background: #374151;
+            color: #9ca3af;
+            border-radius: 12px 12px 12px 4px;
+            max-width: 240px;
+            font-style: italic;
+        }
+
+        /* Input Area */
+        .chat-input-container-${CONFIG.apiKey} {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            background: #ffffff;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        #chat-input-${CONFIG.apiKey} {
+            flex: 1;
+            background: #ffffff;
+            color: #111111;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 12px 16px;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        #chat-input-${CONFIG.apiKey}:focus {
+            background: #ffffff;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
+        }
+
+        #chat-input-${CONFIG.apiKey}::placeholder {
+            color: #9ca3af;
+        }
+
+        .send-btn-${CONFIG.apiKey} {
+            width: 44px;
+            height: 44px;
+            background: ${CONFIG.primaryColor};
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn-${CONFIG.apiKey}:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .send-btn-${CONFIG.apiKey}:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .send-icon-${CONFIG.apiKey} {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Scrollbar Styling */
+        .chat-messages-${CONFIG.apiKey}::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages-${CONFIG.apiKey}::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages-${CONFIG.apiKey}::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 3px;
+        }
+
+        .chat-messages-${CONFIG.apiKey}::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.5);
+        }
+
+        /* Markdown Styling for Bot Messages */
+        .bot-message-${CONFIG.apiKey} h1,
+        .bot-message-${CONFIG.apiKey} h2,
+        .bot-message-${CONFIG.apiKey} h3 {
+            margin: 0.5em 0 0.3em 0;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .bot-message-${CONFIG.apiKey} h1 { font-size: 1.2em; }
+        .bot-message-${CONFIG.apiKey} h2 { font-size: 1.1em; }
+        .bot-message-${CONFIG.apiKey} h3 { font-size: 1em; }
+
+        .bot-message-${CONFIG.apiKey} p {
+            margin: 0.3em 0;
+        }
+
+        .bot-message-${CONFIG.apiKey} code {
+            background: #e2e8f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .bot-message-${CONFIG.apiKey} pre {
+            background: #e2e8f0;
+            padding: 8px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5em 0;
+        }
+
+        .bot-message-${CONFIG.apiKey} ul,
+        .bot-message-${CONFIG.apiKey} ol {
+            margin: 0.3em 0;
+            padding-left: 1.2em;
+        }
+
+        .bot-message-${CONFIG.apiKey} li {
+            margin: 0.2em 0;
+        }
+
+        .bot-message-${CONFIG.apiKey} strong {
+            font-weight: bold;
+        }
+
+        .bot-message-${CONFIG.apiKey} em {
+            font-style: italic;
+        }
+
+        .bot-message-${CONFIG.apiKey} blockquote {
+            border-left: 3px solid ${CONFIG.primaryColor};
+            padding-left: 8px;
+            margin: 0.5em 0;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .chat-popup-${CONFIG.apiKey} {
+                width: 90%;
+                height: 70%;
+                right: 5%;
+                bottom: 90px;
+            }
+        }
+    `;
+    
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = styles;
+    document.head.appendChild(styleSheet);
+
+    // ------------------------------------------------------------------------
+    // STATE MANAGEMENT
+    // ------------------------------------------------------------------------
+    
+    let sessionId = localStorage.getItem(`chatbot_session_${CONFIG.apiKey}`) || null;
+    let isOpen = false;
+    let messageHistory = [];
+    let isLoading = false;
+
+    // ------------------------------------------------------------------------
+    // DOM ELEMENTS
+    // ------------------------------------------------------------------------
+    
+    const chatButton = document.getElementById(`chat-button-${CONFIG.apiKey}`);
+    const chatPopup = document.getElementById(`chat-popup-${CONFIG.apiKey}`);
+    const closeChat = document.getElementById(`close-chat-${CONFIG.apiKey}`);
+    const chatInput = document.getElementById(`chat-input-${CONFIG.apiKey}`);
+    const sendBtn = document.getElementById(`send-btn-${CONFIG.apiKey}`);
+    const messagesContainer = document.getElementById(`chat-messages-${CONFIG.apiKey}`);
+
+    // ------------------------------------------------------------------------
+    // TYPING INDICATOR
+    // ------------------------------------------------------------------------
+    
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = `message-wrapper-${CONFIG.apiKey} bot-wrapper-${CONFIG.apiKey}`;
+    typingIndicator.style.display = 'none';
+    typingIndicator.innerHTML = `
+        <div class="bot-avatar-${CONFIG.apiKey}">
+            <svg class="chip-icon-${CONFIG.apiKey}" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+        </div>
+        <div class="typing-indicator-${CONFIG.apiKey}" style="display: block;">Γράφει...</div>
+    `;
+
+    // ------------------------------------------------------------------------
+    // UTILITY FUNCTIONS
+    // ------------------------------------------------------------------------
+    
+    /**
+     * Get recent message history (last 6 messages)
+     */
+    function getRecentHistory() {
+        if (messageHistory.length === 0) {
+            return [];
+        }
+        return messageHistory.slice(-6).map(msg => ({
+            role: msg.role,
+            content: msg.content
+        }));
+    }
+
+    /**
+     * Show typing indicator
+     */
+    function showTypingIndicator() {
+        messagesContainer.appendChild(typingIndicator);
+        typingIndicator.style.display = 'flex';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    /**
+     * Hide typing indicator
+     */
+    function hideTypingIndicator() {
+        if (typingIndicator.parentNode) {
+            typingIndicator.parentNode.removeChild(typingIndicator);
+        }
+        typingIndicator.style.display = 'none';
+    }
+
+    /**
+     * Parse ACTION blocks from bot response
+     */
+    function parseActionBlocks(botResponse) {  //παιρνει botresponse
+        const actionMatch = botResponse.match(/<ACTION>(.*?)<\/ACTION>/s);// ψαχνει για block Action..
+        if (actionMatch) {
+            try {
+                console.log("🔍 Raw ACTION content:", actionMatch[1]);
+                const actionData = JSON.parse(actionMatch[1]); //το κειμενο μεσα στο block
+
+                //const bookingUrl =
+                    //actionData.booking_page_url || actionData.booking_url || null;
+                
+                if (actionData.type === 'lead_capture') {
+                    showLeadForm(actionData.fields, actionData.reason);
+                } else if (actionData.type === 'appointment') {
+                    // 🆕 Check mode
+                    if (actionData.mode === 'user_managed' && actionData.booking_page_url) {
+                        // Redirect to Google Booking Page
+                        window.open(actionData.booking_page_url, '_blank');
+                        //window._pendingBookingUrl = bookingUrl; 
+                    } else {
+                        // Custom bot flow (existing)
+                        createAppointmentForm(
+                            actionData.fields || [
+                                { label: "Όνομα", name: "name", type: "text", required: true },
+                                { label: "Email", name: "email", type: "email", required: true },
+                                { label: "Τηλέφωνο", name: "phone", type: "tel", required: true }
+                            ],
+                            actionData.reason || "appointment",
+                            CONFIG.companyDisplayName,
+                            CONFIG.primaryColor,
+                            CONFIG.apiKey
+                        );
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to parse ACTION block:', e);
+            }
+            return botResponse.replace(/<ACTION>.*?<\/ACTION>/s, '').trim();
+        }
+        return botResponse;
+    }
+
+    /**
+     * Show lead capture form
+     */
+    function showLeadForm(fields, reason) {
+        createLeadForm(fields, reason, CONFIG.apiKey, CONFIG.primaryColor);
+    }
+
+    // ------------------------------------------------------------------------
+    // MESSAGE HANDLING
+    // ------------------------------------------------------------------------
+    
+    /**
+     * Add a message to the chat
+     */
+    function addMessage(content, isUser = false) {
+        const messageWrapper = document.createElement('div');
+        messageWrapper.className = `message-wrapper-${CONFIG.apiKey} ${isUser ? `user-wrapper-${CONFIG.apiKey}` : `bot-wrapper-${CONFIG.apiKey}`}`;
+
+        if (isUser) {
+            // User avatar
+            const avatar = document.createElement('div');
+            avatar.className = `user-avatar-${CONFIG.apiKey}`;
+            avatar.innerHTML = `
+                <svg class="chip-icon-${CONFIG.apiKey}" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/>
+                </svg>`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `user-message-${CONFIG.apiKey}`;
+            bubble.textContent = content;
+
+            messageWrapper.appendChild(avatar);
+            messageWrapper.appendChild(bubble);
+            
+        } else {
+            // Bot avatar
+            const avatar = document.createElement('div');
+            avatar.className = `bot-avatar-${CONFIG.apiKey}`;
+
+            if (CONFIG.botAvatarUrl) {
+                avatar.innerHTML = `<img src="${CONFIG.botAvatarUrl}" alt="Bot" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`;
+            } else {
+                avatar.innerHTML = `
+                    <svg class="chip-icon-${CONFIG.apiKey}" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>`;
+            }
+
+            // Bot message bubble
+            const bubble = document.createElement('div');
+            bubble.className = `bot-message-${CONFIG.apiKey}`;
+            if (window.marked && window.DOMPurify) {
+                const markedHtml = marked.parse(content);
+                const cleanHtml = DOMPurify.sanitize(markedHtml);
+                bubble.innerHTML = cleanHtml;
+            } else {
+                bubble.textContent = content;
+            }
+
+            messageWrapper.appendChild(avatar);
+            messageWrapper.appendChild(bubble);
+        }
+
+        messagesContainer.appendChild(messageWrapper);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        messageHistory.push({ role: isUser ? 'user' : 'assistant', content });
+    }
+
+    /**
+     * Send message to API and handle streaming response
+     */
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message || isLoading) return;
+
+        
+        
+        addMessage(message, true);
+        chatInput.value = '';
+        
+        isLoading = true;
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+        
+        showTypingIndicator();
+
+        try {
+            const response = await fetch(`${CONFIG.apiBase}/api/public/widget-chat?api_key=${CONFIG.apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'omit',
+                body: JSON.stringify({
+                    message: message,
+                    history: getRecentHistory(),
+                    session_id: sessionId
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            hideTypingIndicator();
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let botResponse = '';
+            let actionDetected = false;
+            
+            // Create streaming message wrapper
+            const botMessageWrapper = document.createElement('div');
+            botMessageWrapper.className = `message-wrapper-${CONFIG.apiKey} bot-wrapper-${CONFIG.apiKey}`;
+
+            // Create bot avatar
+            const streamAvatar = document.createElement('div');
+            streamAvatar.className = `bot-avatar-${CONFIG.apiKey}`;
+            if (CONFIG.botAvatarUrl) {
+                streamAvatar.innerHTML = `<img src="${CONFIG.botAvatarUrl}" alt="Bot" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`;
+            } else {
+                streamAvatar.innerHTML = `<svg class="chip-icon-${CONFIG.apiKey}" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>`;
+            }
+
+            // Create message bubble
+            const botMessageDiv = document.createElement('div');
+            botMessageDiv.className = `bot-message-${CONFIG.apiKey}`;
+
+            botMessageWrapper.appendChild(streamAvatar);
+            botMessageWrapper.appendChild(botMessageDiv);
+            messagesContainer.appendChild(botMessageWrapper);
+
+            // Process streaming response
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') break;
+                        
+                        try {
+                            const parsed = JSON.parse(data);
+
+                            if (parsed.session_id) {
+                                // Ενημέρωση του active session ID
+                                sessionId = parsed.session_id; 
+                                // Αποθήκευση στο localStorage για μελλοντικές κλήσεις
+                                localStorage.setItem(`chatbot_session_${CONFIG.apiKey}`, sessionId); 
+                                console.log('Session ID received and stored:', sessionId);
+                            }
+                            
+                            
+                            if (parsed.response) {
+                                botResponse += parsed.response;
+
+                                if (botResponse.includes('<ACTION>') && !actionDetected) {
+                                    actionDetected = true;
+                                    showTypingIndicator();
+                                }
+                                
+                                // Update display during streaming
+                                const streamingSanitized = botResponse.replace(/<ACTION>[\s\S]*$/gi, '').trim();
+                                if (window.marked && window.DOMPurify) {
+                                    const markedHtml = marked.parse(streamingSanitized);
+                                    const cleanHtml = DOMPurify.sanitize(markedHtml);
+                                    botMessageDiv.innerHTML = cleanHtml;
+                                } else {
+                                    botMessageDiv.textContent = streamingSanitized;
+                                }
+                                
+                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            }
+                            
+                            
+                            if (parsed.error) {
+                                throw new Error(parsed.error);
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse chunk:', data);
+                        }
+                    }
+                }
+            }
+
+            hideTypingIndicator();
+            
+            // Final cleanup after streaming completes
+            if (botResponse) {
+                const finalCleanedResponse = parseActionBlocks(botResponse);
+                if (window.marked && window.DOMPurify && finalCleanedResponse) {
+                    const markedHtml = marked.parse(finalCleanedResponse);
+                    const cleanHtml = DOMPurify.sanitize(markedHtml);
+                    botMessageDiv.innerHTML = cleanHtml;
+                } else if (finalCleanedResponse) {
+                    botMessageDiv.textContent = finalCleanedResponse;
+                }
+                
+                // Add to message history
+                if (finalCleanedResponse) {
+                    messageHistory.push({ role: 'assistant', content: finalCleanedResponse });
+                }
+            }
+            
+        } catch (error) {
+            console.error('Chat error:', error);
+            hideTypingIndicator();
+            addMessage('Συγγνώμη, προέκυψε ένα σφάλμα. Παρακαλώ δοκιμάστε ξανά.', false);
+        } finally {
+            isLoading = false;
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            chatInput.focus();
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // EVENT LISTENERS
+    // ------------------------------------------------------------------------
+    
+    /**
+     * Toggle chat popup on button click
+     */
+    chatButton.addEventListener('click', function() {
+        isOpen = !isOpen;
+        chatPopup.style.display = isOpen ? 'flex' : 'none';
+        if (isOpen) chatInput.focus();
+    });
+    
+    /**
+     * Close chat on close button click
+     */
+    closeChat.addEventListener('click', function() {
+        isOpen = false;
+        chatPopup.style.display = 'none';
+    });
+    
+    /**
+     * Send message on Enter key press
+     */
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !isLoading) {
+            sendMessage();
+        }
+    });
+    
+    /**
+     * Send message on button click
+     */
+    sendBtn.addEventListener('click', function() {
+        if (!isLoading) {
+            sendMessage();
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    // INITIALIZATION LOG
+    // ------------------------------------------------------------------------
+    
+    
+    console.log(`Widget is connected to API endpoint: /widget-chat?api_key=${CONFIG.apiKey}`);
+
+    // ------------------------------------------------------------------------
+    // EXTERNAL COMPONENTS INTEGRATION
+    // ------------------------------------------------------------------------
+    
+    // Include rating popup functionality
+    {% include 'rating_popup.js' %}
+    
+    // Include lead form functionality
+    {{ lead_form_js|safe }}
+    
+    // Include appointment form functionality
+    {{ appointment_form_js|safe }}
+
+})();

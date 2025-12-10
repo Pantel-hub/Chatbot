@@ -1,0 +1,375 @@
+{
+  "basicInfo": "Basic Information",
+  "cancel": "Cancel",
+  "companyDetails": "Company Details",
+  "companyName": "Company Name",
+  "companyLogo": "Company Logo",
+  "logoPreviewAlt": "Logo preview",
+  "industry": "Industry",
+  "selectIndustry": "Select industry",
+  "other": "Other (please specify)",
+  "webPresence": "Website",
+  "website": "Website",
+  "domain": "Domain",
+  "creatingChatbotTitle": "Creating Chatbot",
+  "creatingChatbotSubtitle": "This may take a few minutes. You can close the window and return later.",
+  "dontClosePage": "Do not close this page.",
+  "willNotifyWhenReady": "We will notify you when it’s ready.",
+  "audienceAndDescription": "Audience & Description",
+  "description": "Description",
+  "required": "This field is required",
+  "uploadFiles": "Upload Files",
+  "uploadOptional": "Adding files is optional but can significantly improve results.",
+  "selectFiles": "Select Files",
+  "clickToUpload": "Click to upload",
+  "dragAndDrop": "or drag & drop",
+  "fileTypes": "Supported types: PDF, DOCX, TXT, etc.",
+  "selectedFiles": "Selected Files",
+  "keywords": "Keywords",
+  "conversationSettings": "Conversation Settings",
+  "chatbotLanguage": "Chatbot Language",
+  "selectLanguage": "Select language",
+  "botName": "Bot Name",
+  "greeting": "Welcome Message",
+  "persona": "Persona",
+  "botRestrictions": "Restrictions",
+  "defaultFailResponse": "Default Fallback Response",
+  "back": "Back",
+  "next": "Next",
+  "submit": "Create Bot",
+  "goToDashboard": "Go to Dashboard",
+  "submitting": "Creating...",
+  "appTitle": "Chatbot Builder",
+  "chatActiveSubtitle": "Your chatbot is active and ready to use.",
+  "copyright": "© 2025 Your Company",
+  "steps": {
+    "basicInfo": "Basics",
+    "knowledge": "Knowledge & Data",
+    "behavior": "Behavior & Rules",
+    "capabilities": "Capabilities",
+    "branding": "Appearance & Branding",
+    "test": "Test & Preview",
+    "deploy": "Integration"
+  },
+  "formSteps": {
+    "altEnglish": "English Flag",
+    "altGreek": "Greek Flag"
+  },
+  "capabilities": {
+    "title": "Capabilities",
+    "coreFeatures": "Core Features",
+    "leadCaptureFields": "Lead Capture Fields"
+  },
+  "features": {
+    "leadCaptureForms": "Lead Capture Forms",
+    "appointmentScheduling": "Appointment Scheduling",
+    "feedbackCollection": "Feedback Collection (Thumbs up/down after an answer)"
+  },
+  "fields": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "message": "Message"
+  },
+  "design": {
+    "title": "Appearance Customization",
+    "subtitle": "Give your chatbot a look that matches your brand.",
+    "switchPreviewPosition": "Switch preview position",
+    "primaryColor": "Primary Color",
+    "colorPickerAriaLabel": "Color picker",
+    "position": "Chatbot Position",
+    "themeStyle": "Theme Style",
+    "positions": {
+      "bottomRight": "Bottom Right",
+      "bottomLeft": "Bottom Left",
+      "topRight": "Top Right",
+      "topLeft": "Top Left"
+    },
+    "themes": {
+      "modern": "Modern",
+      "classic": "Classic",
+      "minimal": "Minimal"
+    },
+    "botAvatar": {
+      "label": "Bot Avatar",
+      "hint": "Upload a square image (JPG, PNG). Max 2MB.",
+      "previewAlt": "Avatar preview",
+      "aria": "Upload bot avatar",
+      "clear": "Clear"
+    },
+    "preview": {
+      "livePreview": "Live Preview",
+      "headerTitle": "Support",
+      "headerSubtitle": "Available",
+      "headerAvatarAlt": "Bot avatar",
+      "botMessage1": "Hello! How can I help?",
+      "userMessage1": "I’d like information about pricing.",
+      "botMessage2": "I can suggest a plan.",
+      "inputPlaceholder": "Type a message…",
+      "sendButton": "Send",
+      "launcherTitle": "Open Chat",
+      "positionLabel": "Position",
+      "themeLabel": "Theme",
+      "colorLabel": "Color"
+    }
+  },
+  "test": {
+    "title": "Chat Widget Preview",
+    "liveMode": "Live Test Mode",
+    "clearChat": "Clear Chat",
+    "suggestions": {
+      "title": "Try these suggestions:"
+    },
+    "formsInfo": {
+      "title": "Test Mode Information",
+      "body": "This is a preview of your chatbot. Contact forms (Lead Forms) and appointment booking will only appear in the actual widget on your website."
+    },
+    "typingIndicator": "Bot is typing…",
+    "inputPlaceholder": "Type your message...",
+    "sendButton": "Send",
+    "infoBox": {
+      "title": "Preview Mode:",
+      "body": "Connected to the server for live testing. Responses depend on the backend."
+    },
+    "defaults": {
+      "botName": "AI Assistant",
+      "greeting": "Welcome! I’m your AI assistant. How can I help today?",
+      "placeholderInGreeting": "AI assistant"
+    },
+    "errors": {
+      "server": "A server error occurred.",
+      "network": "A network error occurred."
+    }
+  },
+  "deploy": {
+    "title": "Integration & Publish",
+    "status": {
+      "published": "Published",
+      "notPublished": "Not Published"
+    },
+    "publishButton": {
+      "publish": "Publish",
+      "published": "Published"
+    },
+    "tabs": {
+      "script": "Script Tag",
+      "react": "React Component",
+      "iframe": "Iframe"
+    },
+    "copyButton": {
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+    "checklist": {
+      "title": "Checklist",
+      "item1": "Correct color/theme selected",
+      "item2": "Correct widget position selected",
+      "item3": "Domain added to allowlist",
+      "item4": "Script loads on the page"
+    },
+    "config": {
+      "title": "Widget Settings",
+      "botId": "Bot ID",
+      "theme": "Theme",
+      "position": "Position",
+      "primary": "Primary Color"
+    },
+    "domains": {
+      "title": "Allowed Domains",
+      "placeholder": "e.g., example.com",
+      "add": "Add",
+      "remove": "Remove"
+    },
+    "defaults": {
+      "greeting": "Welcome! I’m your AI assistant. How can I help?",
+      "botName": "AI Assistant"
+    }
+  },
+  "analytics": {
+    "title": "Performance Overview",
+    "lastUpdated": "Last updated: {{time}}",
+    "autoRefresh": "Auto refresh",
+    "refresh": "Refresh",
+    "error": "Failed to load analytics ({{error}}). Please try again.",
+    "stats": {
+      "totalChats": "Total Chats",
+      "avgResponseTime": "Average Response Time",
+      "deflectionRate": "Deflection Rate",
+      "satisfaction": "User Satisfaction"
+    },
+    "intents": {
+      "title": "Top User Intents",
+      "noData": "No intent data available."
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "noData": "No recent activity."
+    }
+  },
+  "placeholders": {
+    "companyExample": "e.g., Acme Inc.",
+    "industryOther": "Please specify your industry",
+    "website": "https://www.example.com",
+    "domain": "example.com",
+    "description": "Describe your company, mission, and services...",
+    "keywords": "Enter comma-separated keywords (e.g., artificial intelligence, marketing, data analytics)",
+    "botName": "e.g., Customer Support Assistant",
+    "greeting": "e.g., Hello! How can I help today?",
+    "persona": "Describe the bot’s personality.",
+    "botRestrictions": "Describe what the bot must not do, e.g., 'Do not answer unrelated questions. Do not use slang.'",
+    "defaultFailResponse": "e.g., Sorry, I couldn’t find an answer. Could you rephrase?",
+    "botTypePreset": "Select bot type"
+    },
+  "industries": {
+    "technology": "Technology",
+    "finance": "Finance",
+    "healthcare": "Healthcare",
+    "education": "Education",
+    "retail": "Retail",
+    "manufacturing": "Manufacturing",
+    "hospitality": "Hospitality",
+    "media": "Media",
+    "real_estate": "Real Estate",
+    "transportation": "Transportation",
+    "energy": "Energy",
+    "government": "Government",
+    "non_profit": "Non-profit",
+    "other": "Other"
+  },
+  "languages": {
+    "en": "English",
+    "el": "Greek"
+  },
+  "personas": {
+    "tech": "Technical Support",
+    "friendly": "Friendly",
+    "support": "Supportive",
+    "professional": "Professional",
+    "sales": "Sales",
+    "faq": "FAQ",
+    "onboarding": "Onboarding",
+    "other": "Other (please specify)"
+  },
+  "logoUploader": {
+    "title": "Upload Company Logo",
+    "action": "Click to upload",
+    "orDragAndDrop": "or drag & drop",
+    "hint": "Accepted types: PNG, JPG, GIF, SVG. Max 2MB.",
+    "recommended": "Recommended size: 256×256 (1:1 ratio)",
+    "maxSize": "Maximum size: 2MB · PNG/JPG/SVG",
+    "caption": "The logo will appear in your chatbot and reports."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions (FAQ)",
+    "subtitle": "Add FAQs to guide the bot’s answers.",
+    "question": "Question",
+    "answer": "Answer",
+    "placeholders": {
+      "question": "e.g., What are your opening hours?",
+      "answer": "e.g., We’re open Monday–Friday, 09:00–17:00."
+    },
+    "remove": "Remove",
+    "add": "Add question"
+  },
+  "botTypePreset": "Bot Type (Preset)",
+  "login": {
+    "title": "Login with one-time code (OTP)",
+    "welcomeBack": "Welcome!",
+    "enterCode": "Enter the code we sent you",
+    "email": "Email",
+    "otpCode": "One-time code (OTP)",
+    "sendOtp": "Send OTP",
+    "login": "Login",
+    "sending": "Sending OTP...",
+    "loggingIn": "Logging in...",
+    "changeEmail": "Change email",
+    "resendOtp": "Resend OTP",
+    "resending": "Sending...",
+    "enterEmail": "Please enter your email",
+    "validEmail": "Please enter a valid email",
+    "enterOtp": "Please enter the 6-digit OTP",
+    "otpSentTo": "Enter the 6-digit code sent to",
+    "successLogin": "Login successful!",
+    "noAccount": "Don’t have an account?",
+    "signUp": "Sign up"
+  },
+  "botTypeDefaults": {
+  "Sales": {
+    "botName": "Sales Assistant",
+    "greeting": "Hello! How can I help you today?",
+    "persona": "Professional and trustworthy, helpful and consultative, enthusiastic about company's offerings, respectful of customer's decision-making process"
+  },
+  "Support": {
+    "botName": "Support Helper",
+    "greeting": "Hi there! What can I assist you with?",
+    "persona": "Empathetic and understanding, patient and helpful, clear and instructional, professional and reassuring, honest about limitations"
+  },
+  "FAQ": {
+    "botName": "Info Bot",
+    "greeting": "Welcome! What would you like to know?",
+    "persona": "Informative and precise, well-organized and clear, professional and reliable, direct but helpful"
+  },
+  "Onboarding": {
+    "botName": "Welcome Guide",
+    "greeting": "Hello! I'm here to help you get started.",
+    "persona": "Welcoming and encouraging, patient and supportive, educational without being overwhelming, positive and motivational"
+  }
+},
+  "signup": {
+    "firstName": "First Name",
+    "firstNamePlaceholder": "e.g. John",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "e.g. Doe",
+    "fullNameRequired": "Please enter your first name.",
+    "lastNameRequired": "Please enter your last name.",
+    "email": "Email",
+    "phone": "Phone",
+    "verificationMethod": "Choose verification method",
+    "emailInvalid": "Invalid email."
+  },
+  "createAccount": {
+    "title": "Create Account",
+    "subtitle": "Fill in your details to continue",
+    "cta": "Create Account"
+  },
+  "landing": {
+    "brand": "YourBrand",
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "contact": "Contact"
+    },
+    "cta": {
+      "signIn": "Sign in",
+      "getStarted": "Get Started",
+      "startFree": "Start for Free",
+      "liveDemo": "Live Demo"
+    },
+    "badge": "New: Faster onboarding",
+    "hero": {
+      "title": "Build delightful experiences in minutes.",
+      "subtitle": "Launch a polished product site with a clean design, responsive layout, and zero fuss."
+    },
+    "features": {
+      "cleanDesign": {
+        "title": "Clean Design",
+        "desc": "Modern typography and balanced layout."
+      },
+      "secureFast": {
+        "title": "Secure & Fast",
+        "desc": "Best practices and lightweight assets."
+      },
+      "easyLaunch": {
+        "title": "Easy to Launch",
+        "desc": "Copy, paste, customize in seconds."
+      }
+    },
+    "footer": {
+      "allRights": "All rights reserved.",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "support": "Support"
+    }
+  }
+}
