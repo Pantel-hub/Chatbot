@@ -48,7 +48,7 @@ export default function Deploy({ formData = {}, disabled = false, onPublish, api
 
   const startCalendarOAuth = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/cms/calendar-auth`, {
+      const res = await fetch(`${BASE_URL}/api/public/calendar-auth/${apiKey}`, {
         credentials: 'include'
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -278,6 +278,27 @@ export default function Deploy({ formData = {}, disabled = false, onPublish, api
 
               {calStatus === 'error' && (
                 <div className="mt-2 text-xs text-rose-600">Λεπτομέρειες: {calMsg}</div>
+              )}
+              
+              {/* Embedded Google Calendar iframe */}
+              {calStatus === 'connected' && (
+                <div className="mt-4 pt-4 border-t border-slate-200">
+                  <div className="text-sm font-semibold text-slate-700 mb-2">Το Ημερολόγιό σας</div>
+                  <div className="rounded-lg overflow-hidden border border-slate-200">
+                    <iframe 
+                      src="https://calendar.google.com/calendar/embed?mode=WEEK&amp;showTitle=0&amp;showNav=1&amp;showDate=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;height=400&amp;wkst=2&amp;bgcolor=%23ffffff"
+                      style={{ borderWidth: 0 }}
+                      width="100%"
+                      height="400"
+                      frameBorder="0"
+                      scrolling="no"
+                      title="Google Calendar"
+                    ></iframe>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Τα ραντεβού θα εμφανίζονται στο ημερολόγιο "Bot_Bookings"
+                  </p>
+                </div>
               )}
             </div>
 

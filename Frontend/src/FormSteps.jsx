@@ -240,8 +240,13 @@ export default function FormSteps({
     // Έλεγχος μόνο στο βήμα Capabilities (index 3)
     if (currentPage === 3) {
       const settings = formData?.appointmentSettings || {};
-      if (settings?.mode === 'user_managed' && !settings?.calendar_id) {
-        alert('Παρακαλώ εισάγετε το Calendar ID σας για να συνεχίσετε.');
+      console.log('🔍 Appointment settings:', settings);
+      console.log('🔍 Mode:', settings?.mode);
+      console.log('🔍 Booking URL:', settings?.booking_page_url);
+      
+      // Έλεγχος για user_managed mode: απαιτείται το booking_page_url
+      if (settings?.mode === 'user_managed' && !settings?.booking_page_url?.trim()) {
+        alert('Παρακαλώ εισάγετε το Google Booking Page URL για να συνεχίσετε.');
         return;
       }
     }

@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  # Frontend React Application
+  frontend:
+    build: ./Frontend
+    container_name: chatbot-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
   # Backend FastAPI Application
   backend:
     build: ./Backend

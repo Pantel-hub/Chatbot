@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test Appointment Creation</title>
+	</head>
+	<body>
+		<h1>Test Appointment Creation</h1>
+		<button onclick="testAppointment()">Create Test Appointment</button>
+		<div id="result"></div>
+
+		<script>
+			async function testAppointment() {
+				const apiKey = "cb_gz7M2KBCwTY2wlzmyXe9qjyOaHE1e429";
+
+				// Create appointment for today at 15:00
+				const now = new Date();
+				now.setHours(15, 0, 0, 0);
+				const start_datetime = now.toISOString();
+
+				const payload = {
+					start_datetime: start_datetime,
+					name: "Test User",
+					email: "test@example.com",
+					phone: "+30 123 456 7890",
+					notes: "Test appointment from HTML",
+				};
+
+				console.log("Sending appointment request:", payload);
+				document.getElementById("result").innerHTML =
+					"Sending request...";
+
+				try {
+					const response = await fetch(
+						`http://localhost:8000/api/public/create-appointment/${apiKey}`,
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify(payload),
+						}
+					);
+
+					const data = await response.json();
+					console.log("Response:", data);
+					document.getElementById(
+						"result"
+					).innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+					if (response.ok) {
+						alert("Appointment created successfully!");
+					} else {
+						alert("Error: " + JSON.stringify(data));
+					}
+				} catch (error) {
+					console.error("Error:", error);
+					document.getElementById(
+						"result"
+					).innerHTML = `Error: ${error.message}`;
+					alert("Error: " + error.message);
+				}
+			}
+		</script>
+	</body>
+</html>
