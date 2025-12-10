@@ -35,6 +35,8 @@ app = FastAPI(title="Chatbot Platform", lifespan=lifespan)
 ALLOWED_CMS_ORIGINS = {
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     
 }
 
@@ -74,8 +76,12 @@ class PathBasedCORSMiddleware(BaseHTTPMiddleware):
                     resp.headers["Access-Control-Max-Age"] = "600" 
                 # αν δεν είναι whitelisted, αφήνουμε 204 χωρίς ACAO -> ο browser θα μπλοκάρει
             elif path.startswith("/api/public"):
-                # Πλήρως public, χωρίς credentials
-                resp.headers["Access-Control-Allow-Origin"] = "*"
+                # Public endpoints: allow all origins with credentials support
+                if origin:
+                    resp.headers["Access-Control-Allow-Origin"] = origin
+                else:
+                    resp.headers["Access-Control-Allow-Origin"] = "*"
+                resp.headers["Access-Control-Allow-Credentials"] = "true"
                 resp.headers["Access-Control-Allow-Methods"] = ", ".join(sorted(PUBLIC_METHODS))
                 resp.headers["Access-Control-Allow-Headers"] = acr_headers or ", ".join(sorted(PUBLIC_HEADERS))
                 resp.headers["Access-Control-Max-Age"] = "600" # ενημερώνει τον browser (client) για το πόσο χρόνο (σε δευτερόλεπτα) μπορεί να αποθηκεύσει (cache) τις πληροφορίες έγκρισης από τον CORS Preflight request.
@@ -98,7 +104,12 @@ class PathBasedCORSMiddleware(BaseHTTPMiddleware):
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
         elif path.startswith("/api/public"):
-            response.headers["Access-Control-Allow-Origin"] = "*"
+            # For public endpoints with credentials
+            if origin:
+                response.headers["Access-Control-Allow-Origin"] = origin
+            else:
+                response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Credentials"] = "true"
             
             
 

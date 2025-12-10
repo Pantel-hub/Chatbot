@@ -31,9 +31,15 @@ export default function Deploy({ formData = {}, disabled = false, onPublish, api
   const checkCalendarStatus = async () => {
     if (!apiKey) { setCalStatus('not_connected'); return }
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
       const res = await fetch(`${BASE_URL}/api/cms/calendar-status`, {
-        credentials: 'include'
+        credentials: 'include',
+        signal: controller.signal
       })
+      clearTimeout(timeout)
+      
       if (res.status === 200) {
         const data = await res.json()
         setCalStatus(data.connected ? 'connected' : 'not_connected')
@@ -42,21 +48,41 @@ export default function Deploy({ formData = {}, disabled = false, onPublish, api
         setCalMsg(`HTTP ${res.status}`)
       }
     } catch (e) {
-      setCalStatus('error'); setCalMsg(e.message || 'Network error')
+      setCalStatus('error'); 
+      if (e.name === 'AbortError') {
+        setCalMsg('Request timeout - server not responding')
+      } else {
+        setCalMsg(e.message || 'Network error')
+      }
     }
   }
 
   const startCalendarOAuth = async () => {
     try {
+      setCalStatus('checking')
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
       const res = await fetch(`${BASE_URL}/api/public/calendar-auth/${apiKey}`, {
-        credentials: 'include'
+        credentials: 'include',
+        signal: controller.signal
       })
+      clearTimeout(timeout)
+      
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       if (data?.auth_url) window.open(data.auth_url, 'gcal', 'width=600,height=700');
       else throw new Error('Missing auth_url')
+      setCalStatus('connected')
     } catch (e) {
-      setCalStatus('error'); setCalMsg(e.message || 'Could not start OAuth')
+      setCalStatus('error')
+      if (e.name === 'AbortError') {
+        setCalMsg('Request timeout - server not responding')
+      } else if (e.message.includes('Failed to fetch')) {
+        setCalMsg('Network error - check your connection')
+      } else {
+        setCalMsg(e.message || 'Could not start OAuth')
+      }
     }
   }
 
