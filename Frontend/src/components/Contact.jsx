@@ -1,7 +1,9 @@
 import React from "react";
 import { ArrowLeft, Mail, Phone, MapPin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Contact({ onBack }) {
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 flex flex-col animate-fade-in">
@@ -14,14 +16,14 @@ export default function Contact({ onBack }) {
               className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back
+              {t("contact.back")}
             </button>
             <div className="flex items-center gap-2">
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
               <span className="text-lg font-bold tracking-tight">grimbot</span>
             </div>
           </div>
-          <span className="text-lg font-semibold text-gray-700">Contact Us</span>
+          <span className="text-lg font-semibold text-gray-700">{t("contact.title")}</span>
         </div>
       </header>
 
@@ -30,10 +32,10 @@ export default function Contact({ onBack }) {
         {/* Page Title */}
         <div className="mb-12 text-center animate-fade-in">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 animate-slide-up">
-            Get in Touch
+            {t("contact.pageTitle")}
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '100ms' }}>
-            Have questions about grimbot? We'd love to hear from you.
+            {t("contact.subtitle")}
           </p>
         </div>
 
@@ -44,7 +46,7 @@ export default function Contact({ onBack }) {
               <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center mb-4 transition-transform hover:rotate-12">
                 <Mail className="h-6 w-6 text-indigo-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t("contact.email")}</h3>
               <p className="text-gray-600 text-sm">info@softbiz.eu</p>
             </div>
 
@@ -52,16 +54,16 @@ export default function Contact({ onBack }) {
               <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4 transition-transform hover:rotate-12">
                 <Phone className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t("contact.phone")}</h3>
               <p className="text-gray-600 text-sm">+30 210.684.6329</p>
-              <p className="text-gray-600 text-sm">Mon-Fri 9am-9pm EET</p>
+              <p className="text-gray-600 text-sm">{t("contact.phoneHours")}</p>
             </div>
 
             <div className="rounded-2xl border border-gray-200 bg-white/80 backdrop-blur shadow-sm p-6 hover:shadow-lg hover:scale-105 hover:border-green-300 transition-all duration-300 animate-slide-up" style={{ animationDelay: '400ms' }}>
               <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center mb-4 transition-transform hover:rotate-12">
                 <MapPin className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Office</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t("contact.office")}</h3>
               <p className="text-gray-600 text-sm">Ανδρέα Παπανδρέου 47</p>
               <p className="text-gray-600 text-sm">15232 Χαλάνδρι Αττική Ελλάδα</p>
             </div>
@@ -78,7 +80,7 @@ export default function Contact({ onBack }) {
               <span className="font-semibold text-gray-900">grimbot</span>
             </div>
             <p className="text-sm text-gray-600">
-              © {new Date().getFullYear()} grimbot. All rights reserved.
+              © {new Date().getFullYear()} grimbot. {t("contact.footer")}
             </p>
           </div>
         </div>

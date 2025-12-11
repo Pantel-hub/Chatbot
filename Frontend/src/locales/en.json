@@ -333,6 +333,33 @@
     "subtitle": "Fill in your details to continue",
     "cta": "Create Account"
   },
+  "pricing": {
+    "title": "Usage & Pricing",
+    "pageTitle": "Usage & Cost Analysis",
+    "subtitle": "Monitor your OpenAI API usage and costs per user. Track total messages and estimated spending.",
+    "back": "Back",
+    "totalUsers": "Total Users",
+    "totalMessages": "Total Messages",
+    "totalCost": "Total Cost",
+    "perUserBreakdown": "Per-User Breakdown",
+    "loading": "Loading...",
+    "noData": "No usage data available yet.",
+    "user": "User",
+    "messages": "Messages",
+    "cost": "Cost (USD)",
+    "footer": "All rights reserved."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "pageTitle": "Get in Touch",
+    "subtitle": "Have questions about grimbot? We'd love to hear from you.",
+    "back": "Back",
+    "email": "Email",
+    "phone": "Phone",
+    "office": "Office",
+    "phoneHours": "Mon-Fri 9am-9pm EET",
+    "footer": "All rights reserved."
+  },
   "landing": {
     "brand": "YourBrand",
     "nav": {
@@ -348,8 +375,8 @@
     },
     "badge": "New: Faster onboarding",
     "hero": {
-      "title": "Build delightful experiences in minutes.",
-      "subtitle": "Launch a polished product site with a clean design, responsive layout, and zero fuss."
+      "title": "Create your own AI Chatbot",
+      "subtitle": "Train it with your company's data and easily embed it on your website."
     },
     "features": {
       "cleanDesign": {

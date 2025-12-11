@@ -2,6 +2,7 @@
 import React from "react";
 import { Rocket, Shield, Sparkles, ArrowRight, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import chatbotLandingSvg from "../assets/chatbot_landing.svg";
 
 export default function LandingPage({ onStart, onSignIn, onPricing, onContact }) {
   const { t, i18n } = useTranslation();
@@ -81,7 +82,7 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
 
           <div className="relative h-full">
             <div className="mx-auto max-w-6xl h-full px-4">
-              <div className="grid h-full items-center">
+              <div className="grid h-full items-center lg:grid-cols-2 gap-8">
                 <div className="max-w-3xl">
                   <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
                     {t("landing.badge", "New: Faster onboarding")}
@@ -161,7 +162,14 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
                   </div>
                 </div>
 
-                {/* Optional right visual could go here */}
+                {/* SVG Image */}
+                <div className="hidden lg:flex items-center justify-center">
+                  <img 
+                    src={chatbotLandingSvg} 
+                    alt="Chatbot Landing" 
+                    className="w-full max-w-md animate-fade-in"
+                  />
+                </div>
               </div>
             </div>
           </div>
