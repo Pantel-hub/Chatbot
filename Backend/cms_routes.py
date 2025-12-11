@@ -67,7 +67,53 @@ from AI_assistant_helper import (
     KnowledgeProcessingError,
 )
 
+
 router = APIRouter()
+
+# --- Pricing: Per-user OpenAI API usage/cost endpoint ---
+from fastapi import status
+
+
+@router.get("/user-usage-stats", status_code=status.HTTP_200_OK)
+async def get_user_usage_stats():
+    """
+    Returns a list of all users with their OpenAI API usage (total messages) and estimated cost.
+    Joins users, user_chatbots, and total_analytics.
+    """
+    try:
+        async with get_db() as conn:
+            async with conn.cursor() as cursor:
+                # Join users, user_chatbots, total_analytics
+                await cursor.execute(
+                    """
+                    SELECT u.id as user_id, u.email, u.first_name, u.last_name, ta.total_messages
+                    FROM users u
+                    JOIN user_chatbots uc ON u.id = uc.user_id
+                    JOIN total_analytics ta ON uc.api_key = ta.api_key
+                """
+                )
+                rows = await cursor.fetchall()
+        # Pricing: $0.0015 per 1K messages (example, adjust as needed)
+        PRICE_PER_1K = 0.0015
+        user_stats = []
+        for row in rows:
+            total_messages = row["total_messages"] or 0
+            cost = round((total_messages / 1000) * PRICE_PER_1K, 4)
+            user_stats.append(
+                {
+                    "user_id": row["user_id"],
+                    "email": row["email"],
+                    "first_name": row["first_name"],
+                    "last_name": row["last_name"],
+                    "total_messages": total_messages,
+                    "cost_usd": cost,
+                }
+            )
+        return {"users": user_stats}
+    except Exception as e:
+        logger.error(f"Error in get_user_usage_stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch user usage stats")
+
 
 load_dotenv()
 

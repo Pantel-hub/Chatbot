@@ -6,6 +6,8 @@ import SidebarPreview from './components/SidebarPreview';
 import LoadingPage from './components/LoadingPage';
 import CreateAccountModal from './components/CreateAccountModal';
 import LandingPage from './components/LandingPage';
+import Pricing from './components/Pricing';
+import Contact from './components/Contact';
 import OtpPage from './components/OtpPage';
 import Dashboard from './components/Dashboard';
 import { API_ENDPOINTS } from './config/api';
@@ -24,8 +26,7 @@ export default function App() {
   const [widgetScript, setWidgetScript] = useState(null);
   const [pendingFormData, setPendingFormData]=useState(null);
   const [currentView, setCurrentView] = useState('loading');
-
-   // 'landing' | 'login' | 'form' | 'dashboard'
+  // 'landing' | 'login' | 'form' | 'dashboard' | 'pricing' | 'contact'
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [editingChatbot, setEditingChatbot] = useState(null);
   const [activeChatbotId, setActiveChatbotId] = useState(null);
@@ -319,11 +320,20 @@ export default function App() {
 
   return (
     <div className="min-h-screen font-sans">
+
       {currentView === 'landing' && (
         <LandingPage 
           onStart={() => setCurrentView('form')}
           onSignIn={() => setCurrentView('login')}
+          onPricing={() => setCurrentView('pricing')}
+          onContact={() => setCurrentView('contact')}
         />
+      )}
+      {currentView === 'pricing' && (
+        <Pricing onBack={() => setCurrentView('landing')} />
+      )}
+      {currentView === 'contact' && (
+        <Contact onBack={() => setCurrentView('landing')} />
       )}
 
       {currentView === 'login' && (

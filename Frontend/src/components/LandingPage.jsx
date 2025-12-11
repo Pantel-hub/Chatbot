@@ -3,7 +3,7 @@ import React from "react";
 import { Rocket, Shield, Sparkles, ArrowRight, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-export default function LandingPage({ onStart, onSignIn }) {
+export default function LandingPage({ onStart, onSignIn, onPricing, onContact }) {
   const { t, i18n } = useTranslation();
 
   // 🔘 Inline κουμπί αλλαγής γλώσσας (χωρίς ξεχωριστό component)
@@ -14,7 +14,7 @@ export default function LandingPage({ onStart, onSignIn }) {
   const toggleLang = () => i18n.changeLanguage(nextLang);
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-b from-white to-zinc-50 text-gray-900 flex flex-col">
+    <div className="h-screen overflow-hidden bg-gradient-to-b from-white to-zinc-50 text-gray-900 flex flex-col animate-fade-in">
       {/* Header */}
       <header className="shrink-0 sticky top-0 z-30 bg-white/70 backdrop-blur border-b border-gray-100">
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
@@ -22,7 +22,7 @@ export default function LandingPage({ onStart, onSignIn }) {
           <div className="flex items-center gap-2">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
             <span className="text-lg font-bold tracking-tight">
-              {t("landing.brand", "YourBrand")}
+              {t("landing.brand", "Grimbot")}
             </span>
           </div>
 
@@ -31,12 +31,12 @@ export default function LandingPage({ onStart, onSignIn }) {
             <button className="hover:text-indigo-600">
               {t("landing.nav.features", "Features")}
             </button>
-            <button className="hover:text-indigo-600">
+            <button className="hover:text-indigo-600" onClick={onPricing}>
               {t("landing.nav.pricing", "Pricing")}
             </button>
-            <button className="hover:text-indigo-600">
+            <button className="hover:text-indigo-600" onClick={onContact}>
               {t("landing.nav.contact", "Contact")}
-            </button>
+            </button> 
           </nav>
 
           {/* Actions */}
@@ -117,8 +117,8 @@ export default function LandingPage({ onStart, onSignIn }) {
 
                   {/* Feature cards */}
                   <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="rounded-2xl border border-gray-200 bg-white p-5 flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                    <div className="rounded-2xl border border-gray-200 bg-white p-5 flex items-start gap-3 hover:shadow-lg hover:scale-105 hover:border-indigo-300 transition-all duration-300 animate-slide-up" style={{ animationDelay: '300ms' }}>
+                      <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 transition-transform hover:rotate-12">
                         <Sparkles className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div>
@@ -131,8 +131,8 @@ export default function LandingPage({ onStart, onSignIn }) {
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-gray-200 bg-white p-5 flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                    <div className="rounded-2xl border border-gray-200 bg-white p-5 flex items-start gap-3 hover:shadow-lg hover:scale-105 hover:border-indigo-300 transition-all duration-300 animate-slide-up" style={{ animationDelay: '400ms' }}>
+                      <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 transition-transform hover:rotate-12">
                         <Shield className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div>
@@ -145,8 +145,8 @@ export default function LandingPage({ onStart, onSignIn }) {
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-gray-200 bg-white p-5 flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                    <div className="rounded-2xl border border-gray-200 bg-white p-5 flex items-start gap-3 hover:shadow-lg hover:scale-105 hover:border-indigo-300 transition-all duration-300 animate-slide-up" style={{ animationDelay: '500ms' }}>
+                      <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 transition-transform hover:rotate-12">
                         <Rocket className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div>
@@ -172,7 +172,7 @@ export default function LandingPage({ onStart, onSignIn }) {
       <footer className="shrink-0 border-t border-gray-200">
         <div className="mx-auto max-w-6xl px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} {t("landing.brand", "YourBrand")}.{" "}
+            © {new Date().getFullYear()} {t("landing.brand", "Grimbot")}.{" "}
             {t("landing.footer.allRights", "All rights reserved.")}
           </p>
           <div className="flex items-center gap-4 text-sm">
