@@ -18,57 +18,74 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
     <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 text-gray-900 flex flex-col animate-fade-in">
       {/* Header */}
       <header className="shrink-0 sticky top-0 z-30 bg-white/70 backdrop-blur border-b border-gray-100">
-        <div className="mx-auto max-w-6xl px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
-          {/* Brand */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
-            <span className="text-base sm:text-lg font-bold tracking-tight">
-              {t("landing.brand", "Grimbot")}
-            </span>
+        <div className="mx-auto max-w-6xl px-3 sm:px-4">
+          {/* Top bar */}
+          <div className="py-3 sm:py-4 flex items-center justify-between">
+            {/* Brand */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
+              <span className="text-base sm:text-lg font-bold tracking-tight">
+                {t("landing.brand", "Grimbot")}
+              </span>
+            </div>
+
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-sm">
+              <button className="hover:text-indigo-600 transition-colors">
+                {t("landing.nav.features", "Features")}
+              </button>
+              <button className="hover:text-indigo-600 transition-colors" onClick={onPricing}>
+                {t("landing.nav.pricing", "Pricing")}
+              </button>
+              <button className="hover:text-indigo-600 transition-colors" onClick={onContact}>
+                {t("landing.nav.contact", "Contact")}
+              </button> 
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Κουμπί αλλαγής γλώσσας μέσα στον ίδιο κώδικα */}
+              <button
+                onClick={toggleLang}
+                aria-label={langAria}
+                className="inline-flex items-center justify-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl border border-gray-300 bg-white p-1.5 sm:px-3 sm:py-1.5 text-xs sm:text-sm hover:bg-gray-50 transition-colors"
+              >
+                <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-700" />
+                <span className="hidden sm:inline">{langLabel}</span>
+              </button>
+
+              <button
+                onClick={onSignIn}
+                className="inline-flex items-center justify-center px-2 xs:px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm transition-colors whitespace-nowrap"
+                aria-label={t("landing.cta.signIn", "Sign in")}
+              >
+                <span className="hidden xs:inline">{t("landing.cta.signIn", "Sign in")}</span>
+                <span className="xs:hidden text-[10px]">Login</span>
+              </button>
+              <button
+                onClick={onStart}
+                className="inline-flex items-center justify-center px-2 xs:px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-xs sm:text-sm gap-1 transition-colors whitespace-nowrap"
+                aria-label={t("landing.cta.getStarted", "Get Started")}
+              >
+                <span className="hidden xs:inline">{t("landing.cta.getStarted", "Get Started")}</span>
+                <span className="xs:hidden text-[10px]">Start</span>
+                <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+              </button>
+            </div>
           </div>
 
-          {/* Nav */}
-          <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-sm">
-            <button className="hover:text-indigo-600 transition-colors">
+          {/* Mobile Nav */}
+          <nav className="md:hidden border-t border-gray-200 py-2 flex items-center justify-center gap-4 text-xs">
+            <button className="hover:text-indigo-600 transition-colors py-1">
               {t("landing.nav.features", "Features")}
             </button>
-            <button className="hover:text-indigo-600 transition-colors" onClick={onPricing}>
+            <button className="hover:text-indigo-600 transition-colors py-1" onClick={onPricing}>
               {t("landing.nav.pricing", "Pricing")}
             </button>
-            <button className="hover:text-indigo-600 transition-colors" onClick={onContact}>
+            <button className="hover:text-indigo-600 transition-colors py-1" onClick={onContact}>
               {t("landing.nav.contact", "Contact")}
             </button> 
           </nav>
-
-          {/* Actions */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            {/* Κουμπί αλλαγής γλώσσας μέσα στον ίδιο κώδικα */}
-            <button
-              onClick={toggleLang}
-              aria-label={langAria}
-              className="inline-flex items-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl border border-gray-300 bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm hover:bg-gray-50 transition-colors"
-            >
-              <Globe className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
-              <span className="hidden xs:inline">{langLabel}</span>
-            </button>
-
-            <button
-              onClick={onSignIn}
-              className="hidden sm:inline-flex px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm transition-colors"
-              aria-label={t("landing.cta.signIn", "Sign in")}
-            >
-              {t("landing.cta.signIn", "Sign in")}
-            </button>
-            <button
-              onClick={onStart}
-              className="px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-xs sm:text-sm flex items-center gap-1 transition-colors"
-              aria-label={t("landing.cta.getStarted", "Get Started")}
-            >
-              <span className="hidden xs:inline">{t("landing.cta.getStarted", "Get Started")}</span>
-              <span className="xs:hidden">Start</span>
-              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-            </button>
-          </div>
         </div>
       </header>
 
