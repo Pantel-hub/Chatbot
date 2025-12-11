@@ -15,9 +15,9 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
   const toggleLang = () => i18n.changeLanguage(nextLang);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 text-gray-900 flex flex-col animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 text-gray-900 flex flex-col animate-fade-in overflow-x-hidden">
       {/* Header */}
-      <header className="shrink-0 sticky top-0 z-30 bg-white/70 backdrop-blur border-b border-gray-100">
+      <header className="shrink-0 sticky top-0 z-30 bg-white/70 backdrop-blur border-b border-gray-100 w-full">
         <div className="mx-auto max-w-6xl px-3 sm:px-4">
           {/* Top bar */}
           <div className="py-3 sm:py-4 flex items-center justify-between">
@@ -90,17 +90,17 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
       </header>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto">
-        <section className="relative min-h-[calc(100vh-64px)]">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden w-full">
+        <section className="relative min-h-[calc(100vh-64px)] w-full">
           {/* Soft blobs */}
-          <div className="pointer-events-none absolute inset-0">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-purple-200/40 blur-3xl" />
             <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-indigo-200/40 blur-3xl" />
           </div>
 
-          <div className="relative">
-            <div className="mx-auto max-w-6xl px-3 sm:px-4 py-8 sm:py-12 lg:py-16">
-              <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
+          <div className="relative w-full">
+            <div className="mx-auto max-w-6xl px-3 sm:px-4 py-8 sm:py-12 lg:py-16 w-full">
+              <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center w-full">
                 <div className="max-w-3xl">
                   <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium text-indigo-700">
                     {t("landing.badge", "New: Faster onboarding")}
@@ -117,20 +117,13 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
                     )}
                   </p>
 
-                  <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <div className="mt-6 sm:mt-8">
                     <button
                       onClick={onStart}
-                      className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 font-medium text-sm sm:text-base transition-all"
+                      className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 font-medium text-sm sm:text-base transition-all shadow-lg hover:shadow-xl"
                       aria-label={t("landing.cta.startFree", "Start for Free")}
                     >
                       {t("landing.cta.startFree", "Start for Free")}
-                    </button>
-                    <button
-                      onClick={onStart}
-                      className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 hover:bg-gray-50 font-medium text-sm sm:text-base transition-all"
-                      aria-label={t("landing.cta.liveDemo", "Live Demo")}
-                    >
-                      {t("landing.cta.liveDemo", "Live Demo")}
                     </button>
                   </div>
 
