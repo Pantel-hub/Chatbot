@@ -15,101 +15,102 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
   const toggleLang = () => i18n.changeLanguage(nextLang);
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-b from-white to-zinc-50 text-gray-900 flex flex-col animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 text-gray-900 flex flex-col animate-fade-in">
       {/* Header */}
       <header className="shrink-0 sticky top-0 z-30 bg-white/70 backdrop-blur border-b border-gray-100">
-        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           {/* Brand */}
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
-            <span className="text-lg font-bold tracking-tight">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
+            <span className="text-base sm:text-lg font-bold tracking-tight">
               {t("landing.brand", "Grimbot")}
             </span>
           </div>
 
           {/* Nav */}
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <button className="hover:text-indigo-600">
+          <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-sm">
+            <button className="hover:text-indigo-600 transition-colors">
               {t("landing.nav.features", "Features")}
             </button>
-            <button className="hover:text-indigo-600" onClick={onPricing}>
+            <button className="hover:text-indigo-600 transition-colors" onClick={onPricing}>
               {t("landing.nav.pricing", "Pricing")}
             </button>
-            <button className="hover:text-indigo-600" onClick={onContact}>
+            <button className="hover:text-indigo-600 transition-colors" onClick={onContact}>
               {t("landing.nav.contact", "Contact")}
             </button> 
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Κουμπί αλλαγής γλώσσας μέσα στον ίδιο κώδικα */}
             <button
               onClick={toggleLang}
               aria-label={langAria}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50"
+              className="inline-flex items-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl border border-gray-300 bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm hover:bg-gray-50 transition-colors"
             >
-              <Globe className="h-4 w-4 text-gray-700" />
-              {langLabel}
+              <Globe className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+              <span className="hidden xs:inline">{langLabel}</span>
             </button>
 
             <button
               onClick={onSignIn}
-              className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
+              className="hidden sm:inline-flex px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm transition-colors"
               aria-label={t("landing.cta.signIn", "Sign in")}
             >
               {t("landing.cta.signIn", "Sign in")}
             </button>
             <button
               onClick={onStart}
-              className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm flex items-center gap-1"
+              className="px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-xs sm:text-sm flex items-center gap-1 transition-colors"
               aria-label={t("landing.cta.getStarted", "Get Started")}
             >
-              {t("landing.cta.getStarted", "Get Started")}
-              <ArrowRight className="h-4 w-4" />
+              <span className="hidden xs:inline">{t("landing.cta.getStarted", "Get Started")}</span>
+              <span className="xs:hidden">Start</span>
+              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
             </button>
           </div>
         </div>
       </header>
 
       {/* Main */}
-      <main className="flex-1 overflow-hidden">
-        <section className="relative h-full">
+      <main className="flex-1 overflow-y-auto">
+        <section className="relative min-h-[calc(100vh-64px)]">
           {/* Soft blobs */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-purple-200/40 blur-3xl" />
             <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-indigo-200/40 blur-3xl" />
           </div>
 
-          <div className="relative h-full">
-            <div className="mx-auto max-w-6xl h-full px-4">
-              <div className="grid h-full items-center lg:grid-cols-2 gap-8">
+          <div className="relative">
+            <div className="mx-auto max-w-6xl px-3 sm:px-4 py-8 sm:py-12 lg:py-16">
+              <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
                 <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+                  <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium text-indigo-700">
                     {t("landing.badge", "New: Faster onboarding")}
                   </div>
 
-                  <h1 className="mt-4 text-4xl md:text-6xl font-extrabold tracking-tight">
+                  <h1 className="mt-3 sm:mt-4 text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
                     {t("landing.hero.title", "Build delightful experiences in minutes.")}
                   </h1>
 
-                  <p className="mt-4 text-lg md:text-xl text-gray-600">
+                  <p className="mt-3 sm:mt-4 text-sm sm:text-lg md:text-xl text-gray-600">
                     {t(
                       "landing.hero.subtitle",
                       "Launch a polished product site with a clean design, responsive layout, and zero fuss."
                     )}
                   </p>
 
-                  <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                  <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <button
                       onClick={onStart}
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 font-medium"
+                      className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 font-medium text-sm sm:text-base transition-all"
                       aria-label={t("landing.cta.startFree", "Start for Free")}
                     >
                       {t("landing.cta.startFree", "Start for Free")}
                     </button>
                     <button
                       onClick={onStart}
-                      className="px-6 py-3 rounded-xl border border-gray-300 hover:bg-gray-50 font-medium"
+                      className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 hover:bg-gray-50 font-medium text-sm sm:text-base transition-all"
                       aria-label={t("landing.cta.liveDemo", "Live Demo")}
                     >
                       {t("landing.cta.liveDemo", "Live Demo")}
@@ -117,7 +118,7 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
                   </div>
 
                   {/* Feature cards */}
-                  <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="mt-6 sm:mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div className="rounded-2xl border border-gray-200 bg-white p-5 flex items-start gap-3 hover:shadow-lg hover:scale-105 hover:border-indigo-300 transition-all duration-300 animate-slide-up" style={{ animationDelay: '300ms' }}>
                       <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 transition-transform hover:rotate-12">
                         <Sparkles className="h-5 w-5 text-indigo-600" />
@@ -177,22 +178,24 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
       </main>
 
       {/* Footer */}
-      <footer className="shrink-0 border-t border-gray-200">
-        <div className="mx-auto max-w-6xl px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} {t("landing.brand", "Grimbot")}.{" "}
-            {t("landing.footer.allRights", "All rights reserved.")}
-          </p>
-          <div className="flex items-center gap-4 text-sm">
-            <button className="text-gray-600 hover:text-indigo-600">
-              {t("landing.footer.privacy", "Privacy")}
-            </button>
-            <button className="text-gray-600 hover:text-indigo-600">
-              {t("landing.footer.terms", "Terms")}
-            </button>
-            <button className="text-gray-600 hover:text-indigo-600">
-              {t("landing.footer.support", "Support")}
-            </button>
+      <footer className="shrink-0 border-t border-gray-200 bg-white mt-auto">
+        <div className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+              © {new Date().getFullYear()} {t("landing.brand", "Grimbot")}.{" "}
+              {t("landing.footer.allRights", "All rights reserved.")}
+            </p>
+            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors">
+                {t("landing.footer.privacy", "Privacy")}
+              </button>
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors">
+                {t("landing.footer.terms", "Terms")}
+              </button>
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors">
+                {t("landing.footer.support", "Support")}
+              </button>
+            </div>
           </div>
         </div>
       </footer>

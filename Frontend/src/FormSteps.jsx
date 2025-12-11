@@ -420,25 +420,25 @@ export default function FormSteps({
   return (
     <>
       {/* Header (flags + title + mobile stepper) */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         {/* γλώσσες */}
-        <div className="flex justify-end gap-3 mb-4">
+        <div className="flex justify-end gap-2 sm:gap-3 mb-3 sm:mb-4">
           <img
             src={UkFlag}
             alt={t('formSteps.altEnglish', 'English')}
-            className={`w-7 h-5 cursor-pointer rounded shadow ${i18n.language === 'en' ? 'ring-2 ring-indigo-500' : ''}`}
+            className={`w-6 sm:w-7 h-4 sm:h-5 cursor-pointer rounded shadow hover:opacity-80 transition-opacity ${i18n.language === 'en' ? 'ring-2 ring-indigo-500' : ''}`}
             onClick={() => changeLang('en')}
           />
         <img
             src={GreekFlag}
             alt={t('formSteps.altGreek', 'Ελληνικά')}
-            className={`w-7 h-5 cursor-pointer rounded shadow ${i18n.language === 'el' ? 'ring-2 ring-indigo-500' : ''}`}
+            className={`w-6 sm:w-7 h-4 sm:h-5 cursor-pointer rounded shadow hover:opacity-80 transition-opacity ${i18n.language === 'el' ? 'ring-2 ring-indigo-500' : ''}`}
             onClick={() => changeLang('el')}
           />
         </div>
 
         {/* Τίτλος τρέχοντος βήματος – με αριθμό μπροστά (π.χ. "5. Εμφάνιση & Branding") */}
-        <p className="text-sm font-medium text-indigo-600" aria-live="polite" aria-atomic="true">
+        <p className="text-xs sm:text-sm font-medium text-indigo-600" aria-live="polite" aria-atomic="true">
           {(currentPage + 1) + '. '}{steps[currentPage]}
         </p>
 
@@ -472,12 +472,12 @@ export default function FormSteps({
           {currentPage === 6 && <Deploy {...commonProps} apiKey={apiKey} widgetScript={widgetScript} />}
         </div>
 
-        <div className={`flex pt-6 ${currentPage > 0 ? 'justify-between' : 'justify-end'}`}>
+        <div className={`flex flex-col sm:flex-row gap-2 sm:gap-0 pt-6 ${currentPage > 0 ? 'sm:justify-between' : 'sm:justify-end'}`}>
           {currentPage > 0 && (
             <button
               type="button"
               onClick={onPrev}
-              className="text-slate-600 font-medium py-3 px-6 rounded-lg bg-slate-100"
+              className="text-slate-600 font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-sm sm:text-base"
             >
               {t('back')}
             </button>
@@ -487,7 +487,7 @@ export default function FormSteps({
             <button
               type="button"
               onClick={currentPage === 4 ? handleSubmit : handleNextGuarded}
-              className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg"
+              className="bg-indigo-600 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               disabled={currentPage === 4 && isSubmitting}
             >
 
@@ -507,7 +507,7 @@ export default function FormSteps({
             <button
               type="button"
                 onClick={onGoToDashboard}
-                className="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors"
+                className="w-full bg-indigo-600 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-indigo-700 transition-colors text-sm sm:text-base"
             >
               {t('goToDashboard', 'Go to Dashboard')}
             </button>

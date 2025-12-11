@@ -8,40 +8,40 @@ export default function Contact({ onBack }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 flex flex-col animate-fade-in">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/70 backdrop-blur border-b border-gray-100">
-        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-30 bg-white/70 backdrop-blur border-b border-gray-100 shrink-0">
+        <div className="mx-auto max-w-6xl px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               onClick={onBack}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm transition-colors"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm transition-colors"
             >
-              <ArrowLeft className="h-4 w-4" />
-              {t("contact.back")}
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">{t("contact.back")}</span>
             </button>
-            <div className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
-              <span className="text-lg font-bold tracking-tight">grimbot</span>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
+              <span className="text-base sm:text-lg font-bold tracking-tight">grimbot</span>
             </div>
           </div>
-          <span className="text-lg font-semibold text-gray-700">{t("contact.title")}</span>
+          <span className="text-sm sm:text-lg font-semibold text-gray-700">{t("contact.title")}</span>
         </div>
       </header>
 
       {/* Main */}
       <main className="mx-auto max-w-6xl px-4 py-8 flex-1">
         {/* Page Title */}
-        <div className="mb-12 text-center animate-fade-in">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 animate-slide-up">
+        <div className="mb-8 sm:mb-12 text-center animate-fade-in">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-2 sm:mb-3 animate-slide-up">
             {t("contact.pageTitle")}
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '100ms' }}>
             {t("contact.subtitle")}
           </p>
         </div>
 
         {/* Contact Info Cards - Centered */}
         <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             <div className="rounded-2xl border border-gray-200 bg-white/80 backdrop-blur shadow-sm p-6 hover:shadow-lg hover:scale-105 hover:border-indigo-300 transition-all duration-300 animate-slide-up" style={{ animationDelay: '200ms' }}>
               <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center mb-4 transition-transform hover:rotate-12">
                 <Mail className="h-6 w-6 text-indigo-600" />

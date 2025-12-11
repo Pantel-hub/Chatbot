@@ -111,25 +111,25 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="rounded-2xl overflow-hidden bg-white shadow-xl">
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 relative rounded-t-2xl">
+    <div className="w-full max-w-md mx-3 sm:mx-0">
+      <div className="rounded-xl sm:rounded-2xl overflow-hidden bg-white shadow-xl">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-8 py-4 sm:py-6 relative rounded-t-xl sm:rounded-t-2xl">
           <button
             onClick={toggleLang}
-            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center gap-1 text-sm"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center gap-1 text-xs sm:text-sm"
           >
-            <Globe className="h-4 w-4" />
-            {i18n.language === 'el' ? 'EN' : 'EL'}
+            <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">{i18n.language === 'el' ? 'EN' : 'EL'}</span>
           </button>
-          <h1 className="text-2xl font-bold text-white text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-white text-center pr-8 sm:pr-0">
             {t('createAccount.title', 'Δημιουργία λογαριασμού')}
           </h1>
-          <p className="text-indigo-100 text-center mt-2">
+          <p className="text-indigo-100 text-center mt-2 text-sm sm:text-base">
             {t('createAccount.subtitle', 'Συμπλήρωσε τα στοιχεία σου για να συνεχίσεις')}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-2">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-2">
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

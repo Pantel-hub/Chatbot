@@ -186,34 +186,36 @@ export default function Dashboard({ onLogout, onEditBot, onCreateNewBot, onSelec
 
   // ---------- UI ----------
   return (
-    <div className="w-full p-4 sm:p-6">
+    <div className="w-full p-2 sm:p-4 md:p-6">
       {/* Header */}
-      <div className="rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
+      <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
         <div className="relative">
           <div className="absolute inset-0 bg-[radial-gradient(1200px_300px_at_20%_-40%,rgba(99,102,241,0.45),transparent),radial-gradient(1200px_300px_at_80%_-40%,rgba(168,85,247,0.45),transparent)]" />
-          <div className="relative px-5 sm:px-7 py-7 flex items-center justify-between">
-            <div className="text-gray-900">
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight"> {t('dashboard.title', 'Dashboard')} </h1>
-              <p className="text-gray-600 text-sm mt-1">{t('dashboard.subtitle', 'Overview & Analytics')}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleLang}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm shadow-sm"
-                aria-label="Toggle language"
-              >
-                <Globe className="h-4 w-4" />
-                {i18n.language === 'el' ? 'EN' : 'EL'}
-              </button>
+          <div className="relative px-3 sm:px-5 md:px-7 py-4 sm:py-6 md:py-7">
+            <div className="flex items-start justify-between">
+              <div className="text-gray-900">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight"> {t('dashboard.title', 'Dashboard')} </h1>
+                <p className="text-gray-600 text-xs sm:text-sm mt-1">{t('dashboard.subtitle', 'Overview & Analytics')}</p>
+              </div>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <button
+                  onClick={toggleLang}
+                  className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-xs sm:text-sm shadow-sm"
+                  aria-label="Toggle language"
+                >
+                  <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">{i18n.language === 'el' ? 'EN' : 'EL'}</span>
+                </button>
 
-              <button
-                onClick={onLogout}
-                className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center gap-1 text-sm"
-                aria-label="Logout"
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
+                <button
+                  onClick={onLogout}
+                  className="p-1.5 sm:p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center gap-1"
+                  aria-label="Logout"
+                  title="Logout"
+                >
+                  <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -238,44 +240,47 @@ export default function Dashboard({ onLogout, onEditBot, onCreateNewBot, onSelec
             title={t('bots.title', 'My Bots')}
             icon={Bot}
             right={
-              <div className="flex items-center gap-2">
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-300 bg-white">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-300 bg-white">
                   <Search className="h-4 w-4 text-gray-500" />
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={t('bots.search', 'Search bots...')}
-                    className="outline-none text-sm bg-transparent placeholder:text-gray-400"
+                    className="outline-none text-sm bg-transparent placeholder:text-gray-400 w-full min-w-[120px]"
                     aria-label="Search bots"
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     onClick={() => setStatusFilter('all')}
-                    className={`px-3 py-1.5 rounded-xl text-sm border ${statusFilter === 'all' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'}`}
+                    className={`px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm border ${statusFilter === 'all' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'}`}
                   >
                     {t('common.all', 'All')}
                   </button>
                   <button
                     onClick={() => setStatusFilter('active')}
-                    className={`px-3 py-1.5 rounded-xl text-sm border ${statusFilter === 'active' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'}`}
+                    className={`px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm border ${statusFilter === 'active' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'}`}
                   >
-                    {t('bots.active', 'Active')}
+                    <span className="hidden sm:inline">{t('bots.active', 'Active')}</span>
+                    <span className="sm:hidden">Act.</span>
                   </button>
                   <button
                     onClick={() => setStatusFilter('paused')}
-                    className={`px-3 py-1.5 rounded-xl text-sm border ${statusFilter === 'paused' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'}`}
+                    className={`px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm border ${statusFilter === 'paused' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'}`}
                   >
-                    {t('bots.paused', 'Paused')}
+                    <span className="hidden sm:inline">{t('bots.paused', 'Paused')}</span>
+                    <span className="sm:hidden">Pau.</span>
                   </button>
                 </div>
                 <button
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm shadow-sm"
+                  className="inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-xs sm:text-sm shadow-sm whitespace-nowrap"
                   onClick={onCreateNewBot}
                   aria-label="Create new bot"
                 >
-                  <Plus className="h-4 w-4" />
-                  {t('bots.new', 'New Bot')}
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">{t('bots.new', 'New Bot')}</span>
+                  <span className="sm:hidden">New</span>
                 </button>
               </div>
             }
@@ -308,7 +313,7 @@ export default function Dashboard({ onLogout, onEditBot, onCreateNewBot, onSelec
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                 {filteredBots.map((b) => (
                   <div
                     key={b.id}
@@ -370,31 +375,31 @@ export default function Dashboard({ onLogout, onEditBot, onCreateNewBot, onSelec
                     </div>
 
 
-                    <div className="mt-4 grid grid-cols-3 gap-2">
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleBotStatus(b.id); }}
-                        className={`inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm border transition ${
+                        className={`inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm border transition ${
                           b.status === 'active'
                             ? 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
                             : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
                         }`}
                       >
-                        {b.status === 'active' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                        {b.status === 'active' ? <Pause className="h-3 w-3 sm:h-4 sm:w-4" /> : <Play className="h-3 w-3 sm:h-4 sm:w-4" />}
                         {b.status === 'active' ? t('bots.pause', 'Pause') : t('bots.activate', 'Activate')}
                       </button>
                       <button 
                         onClick={(e) => { e.stopPropagation(); onEditBot(b.id); }}  // ← Προσθήκη αυτού
-                        className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm border border-gray-300 bg-white hover:bg-gray-50"
+                        className="inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm border border-gray-300 bg-white hover:bg-gray-50"
                       >
-                        <Edit3 className="h-4 w-4" />
+                        <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
                         {t('bots.edit', 'Edit')}
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(b.id); }}
                         disabled={deletingId === b.id}
-                        className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 disabled:opacity-60"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                         {deletingId === b.id ? 'Deleting…' : t('bots.delete', 'Delete')}
                       </button>
 

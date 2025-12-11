@@ -367,20 +367,20 @@ export default function App() {
       {currentView === 'form' && (
         <>
           {/* Mobile Header */}
-          <div className="lg:hidden bg-white border-b border-gray-200 sticky top-0 z-50">
-            <div className="px-4 py-3 flex items-center justify-between">
-              <h1 className={`text-xl font-bold ${titleClass}`}>{t('appTitle')}</h1>
+          <div className="lg:hidden bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+            <div className="px-3 sm:px-4 py-3 flex items-center justify-between">
+              <h1 className={`text-base sm:text-xl font-bold ${titleClass} truncate max-w-[60%]`}>{t('appTitle')}</h1>
 
               {!formSubmitted && !formLoading && (
                 <button
                   onClick={() => setShowMobileSteps((s) => !s)}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
+                  className="flex items-center space-x-1 sm:space-x-2 text-gray-700 hover:text-gray-900 transition-colors px-2 py-1 rounded-lg hover:bg-gray-100"
                   aria-expanded={showMobileSteps}
                   aria-controls="mobile-steps"
                 >
-                  <span className="text-sm font-medium">{mobileStepLabel}</span>
+                  <span className="text-xs sm:text-sm font-medium">{mobileStepLabel}</span>
                   <svg
-                    className={`w-4 h-4 transform transition-transform ${showMobileSteps ? 'rotate-180' : ''}`}
+                    className={`w-3 h-3 sm:w-4 sm:h-4 transform transition-transform ${showMobileSteps ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -435,8 +435,8 @@ export default function App() {
             {/* Main content */}
             <div className="w-full lg:flex-1 bg-zinc-50 min-h-screen lg:min-h-auto">
               <div className={`w-full ${formLoading ?  'flex items-center justify-center min-h-screen lg:min-h-auto' : ''}`}>
-                <div className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 lg:py-10">
-                  <div className="max-w-3xl xl:max-w-4xl">
+                <div className="px-3 sm:px-4 md:px-6 lg:px-10 py-3 sm:py-4 md:py-6 lg:py-10">
+                  <div className="max-w-full sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
                     {formSubmitted ? (
                       <div className="w-full">
                         <ChatBubble chatbotData={formData} apiKey={apiKey} />
