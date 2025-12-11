@@ -23,7 +23,7 @@ export default function LandingPage({ onStart, onSignIn, onPricing, onContact })
           <div className="py-3 sm:py-4 flex items-center justify-between">
             {/* Brand */}
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
+              <img src={chatbotLandingSvg} alt="Logo" className="h-7 w-7 sm:h-9 sm:w-9" />
               <span className="text-base sm:text-lg font-bold tracking-tight">
                 {t("landing.brand", "Grimbot")}
               </span>
