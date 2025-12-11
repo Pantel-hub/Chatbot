@@ -1,8 +1,8 @@
 # aws_helper.py
-import boto3 #βιβλιοθήκη για επικοινωνία server-amazon
+import boto3  # βιβλιοθήκη για επικοινωνία server-amazon
 import os
 import logging
-from botocore.exceptions import ClientError #για σφάλματα επικοινωνίας με την amazon
+from botocore.exceptions import ClientError  # για σφάλματα επικοινωνίας με την amazon
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -15,8 +15,9 @@ AWS_ENV_VARS = [
     "AWS_SES_SENDER_EMAIL",
 ]
 
+
 def get_aws_settings():
-    missing = [] #έλεγχος για το αν λείπει κάποια παράμετρος από το env αρχείο
+    missing = []  # έλεγχος για το αν λείπει κάποια παράμετρος από το env αρχείο
     for var in AWS_ENV_VARS:
         if not os.getenv(var):
             missing.append(var)
@@ -29,13 +30,17 @@ def get_aws_settings():
 
     return {"region": region, "sender_email": sender}
 
-#φτίαχνει έναν boto3 SES client
+
+# φτίαχνει έναν boto3 SES client
 def get_ses_client():
     settings = get_aws_settings()
     region = settings.get("region")
     return boto3.client("ses", region_name=region)
 
-def send_email(to_email: str, subject: str, body_text: str, body_html: str | None = None):
+
+def send_email(
+    to_email: str, subject: str, body_text: str, body_html: str | None = None
+):
     """
     Στέλνει ένα απλό email μέσω AWS SES.
     Επιστρέφει dict με ok True/False και (προαιρετικά) message_id ή error.
@@ -64,6 +69,3 @@ def send_email(to_email: str, subject: str, body_text: str, body_html: str | Non
         # Μην διαρρέεις μυστικά· επέστρεψε καθαρό μήνυμα λάθους
         err_msg = e.response.get("Error", {}).get("Message", str(e))
         return {"ok": False, "error": err_msg}
-
-
-

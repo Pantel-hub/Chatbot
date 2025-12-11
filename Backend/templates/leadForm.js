@@ -1,19 +1,19 @@
 // leadForm.js - Popup Modal Lead Form
 
 function createLeadForm(fields, reason, companyName, primaryColor) {
-    // Clean primary color (remove #)
-    const cleanColor = primaryColor ? primaryColor.replace('#', '') : '4f46e5';
-    
-    // Remove existing modal if any
-    const existingModal = document.querySelector('#lead-modal');
-    if (existingModal) {
-        existingModal.remove();
-    }
+	// Clean primary color (remove #)
+	const cleanColor = primaryColor ? primaryColor.replace("#", "") : "4f46e5";
 
-    // Create modal overlay
-    const modal = document.createElement('div');
-    modal.id = 'lead-modal';
-    modal.innerHTML = `
+	// Remove existing modal if any
+	const existingModal = document.querySelector("#lead-modal");
+	if (existingModal) {
+		existingModal.remove();
+	}
+
+	// Create modal overlay
+	const modal = document.createElement("div");
+	modal.id = "lead-modal";
+	modal.innerHTML = `
         <div class="modal-overlay" onclick="closeLeadModal()">
             <div class="modal-content" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -34,190 +34,202 @@ function createLeadForm(fields, reason, companyName, primaryColor) {
         </div>
     `;
 
-    // Add modal styles
-    addModalStyles(cleanColor);
-    
-    // Add to document
-    document.body.appendChild(modal);
-    
-    // Focus first input
-    setTimeout(() => {
-        const firstInput = modal.querySelector('input, textarea');
-        if (firstInput) firstInput.focus();
-    }, 100);
+	// Add modal styles
+	addModalStyles(cleanColor);
 
-    // Add confirmation message to chat
-    addChatMessage(companyName, 'Παρακαλώ συμπληρώστε τη φόρμα επικοινωνίας που εμφανίστηκε.');
-    
-    return null; // No element to add to chat
+	// Add to document
+	document.body.appendChild(modal);
+
+	// Focus first input
+	setTimeout(() => {
+		const firstInput = modal.querySelector("input, textarea");
+		if (firstInput) firstInput.focus();
+	}, 100);
+
+	// Add confirmation message to chat
+	addChatMessage(
+		companyName,
+		"Παρακαλώ συμπληρώστε τη φόρμα επικοινωνίας που εμφανίστηκε."
+	);
+
+	return null; // No element to add to chat
 }
 
 function createFormFields(fields) {
-    let fieldsHTML = '';
-    
-    fields.forEach(field => {
-        const label = getFieldLabel(field);
-        const type = getFieldType(field);
-        
-        if (type === 'textarea') {
-            fieldsHTML += `
+	let fieldsHTML = "";
+
+	fields.forEach((field) => {
+		const label = getFieldLabel(field);
+		const type = getFieldType(field);
+
+		if (type === "textarea") {
+			fieldsHTML += `
                 <div class="form-field">
                     <label>${label}:</label>
                     <textarea name="${field}" placeholder="Γράψτε το ${label.toLowerCase()} σας..." required></textarea>
                 </div>
             `;
-        } else {
-            fieldsHTML += `
+		} else {
+			fieldsHTML += `
                 <div class="form-field">
                     <label>${label}:</label>
                     <input type="${type}" name="${field}" placeholder="Εισάγετε το ${label.toLowerCase()} σας..." required />
                 </div>
             `;
-        }
-    });
-    
-    return fieldsHTML;
+		}
+	});
+
+	return fieldsHTML;
 }
 
 function getFieldLabel(fieldName) {
-    const labels = {
-        'name': 'Όνομα',
-        'email': 'Email',
-        'phone': 'Τηλέφωνο',
-        'company': 'Εταιρεία',
-        'message': 'Μήνυμα'
-    };
-    return labels[fieldName] || fieldName;
+	const labels = {
+		name: "Όνομα",
+		email: "Email",
+		phone: "Τηλέφωνο",
+		company: "Εταιρεία",
+		message: "Μήνυμα",
+	};
+	return labels[fieldName] || fieldName;
 }
 
 function getFieldType(fieldName) {
-    const types = {
-        'email': 'email',
-        'phone': 'tel',
-        'message': 'textarea'
-    };
-    return types[fieldName] || 'text';
+	const types = {
+		email: "email",
+		phone: "tel",
+		message: "textarea",
+	};
+	return types[fieldName] || "text";
 }
 
 function submitLeadModal(event) {
-    event.preventDefault();
-    
-    const form = event.target;
-    const submitBtn = form.querySelector('.btn-submit');
-    const formData = new FormData(form);
-    
-    // Disable submit button
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Αποστολή...';
-    
-    // Get form data
-    const leadData = {};
-    for (let [key, value] of formData.entries()) {
-        leadData[key] = value.trim();
-    }
-    
-    // Basic validation
-    for (let [key, value] of Object.entries(leadData)) {
-        if (!value) {
-            alert(`Το πεδίο "${getFieldLabel(key)}" είναι υποχρεωτικό.`);
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Αποστολή';
-            return;
-        }
-    }
-    
-    // Email validation if exists
-    if (leadData.email && !isValidEmail(leadData.email)) {
-        alert('Παρακαλώ εισάγετε έγκυρη διεύθυνση email.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Αποστολή';
-        return;
-    }
-    
-    // Submit data
-    submitLeadData(leadData)
-        .then(() => {
-            closeLeadModal();
-            showSuccessMessage();
-        })
-        .catch((error) => {
-            console.error('Lead submission error:', error);
-            alert('Υπήρξε σφάλμα κατά την αποστολή. Παρακαλώ δοκιμάστε ξανά.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Αποστολή';
-        });
+	event.preventDefault();
+
+	const form = event.target;
+	const submitBtn = form.querySelector(".btn-submit");
+	const formData = new FormData(form);
+
+	// Disable submit button
+	submitBtn.disabled = true;
+	submitBtn.textContent = "Αποστολή...";
+
+	// Get form data
+	const leadData = {};
+	for (let [key, value] of formData.entries()) {
+		leadData[key] = value.trim();
+	}
+
+	// Basic validation
+	for (let [key, value] of Object.entries(leadData)) {
+		if (!value) {
+			alert(`Το πεδίο "${getFieldLabel(key)}" είναι υποχρεωτικό.`);
+			submitBtn.disabled = false;
+			submitBtn.textContent = "Αποστολή";
+			return;
+		}
+	}
+
+	// Email validation if exists
+	if (leadData.email && !isValidEmail(leadData.email)) {
+		alert("Παρακαλώ εισάγετε έγκυρη διεύθυνση email.");
+		submitBtn.disabled = false;
+		submitBtn.textContent = "Αποστολή";
+		return;
+	}
+
+	// Submit data
+	submitLeadData(leadData)
+		.then(() => {
+			closeLeadModal();
+			showSuccessMessage();
+		})
+		.catch((error) => {
+			console.error("Lead submission error:", error);
+			alert("Υπήρξε σφάλμα κατά την αποστολή. Παρακαλώ δοκιμάστε ξανά.");
+			submitBtn.disabled = false;
+			submitBtn.textContent = "Αποστολή";
+		});
 }
 
 function closeLeadModal() {
-    const modal = document.querySelector('#lead-modal');
-    if (modal) {
-        modal.remove();
-    }
+	const modal = document.querySelector("#lead-modal");
+	if (modal) {
+		modal.remove();
+	}
 }
 
 function showSuccessMessage() {
-    // Add success message to chat
-    const companyName = document.querySelector('[id*="chat-messages-"]').id.split('-')[2];
-    addChatMessage(companyName, 'Ευχαριστούμε! Τα στοιχεία σας στάλθηκαν με επιτυχία. Θα επικοινωνήσουμε μαζί σας σύντομα.');
+	// Add success message to chat
+	const companyName = document
+		.querySelector('[id*="chat-messages-"]')
+		.id.split("-")[2];
+	addChatMessage(
+		companyName,
+		"Ευχαριστούμε! Τα στοιχεία σας στάλθηκαν με επιτυχία. Θα επικοινωνήσουμε μαζί σας σύντομα."
+	);
 }
 
 function addChatMessage(companyName, message) {
-    const messagesContainer = document.querySelector(`[id*="chat-messages-"]`);
-    if (!messagesContainer) return;
-    
-    const messageWrapper = document.createElement('div');
-    messageWrapper.className = `message-wrapper-${companyName} bot-wrapper-${companyName}`;
-    messageWrapper.innerHTML = `
+	const messagesContainer = document.querySelector(`[id*="chat-messages-"]`);
+	if (!messagesContainer) return;
+
+	const messageWrapper = document.createElement("div");
+	messageWrapper.className = `message-wrapper-${companyName} bot-wrapper-${companyName}`;
+	messageWrapper.innerHTML = `
         <div class="bot-message-${companyName}" style="margin-left: 0;">${message}</div>
     `;
-    messagesContainer.appendChild(messageWrapper);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+	messagesContainer.appendChild(messageWrapper);
+	messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 async function submitLeadData(leadData) {
-    // Get API details from current widget
-    const currentScript = document.currentScript || 
-        Array.from(document.getElementsByTagName('script')).find(s => 
-            s.src && s.src.includes('widget.js')
-        );
-    
-    let apiBase = 'http://127.0.0.1:8000';
-    let apiKey = '';
-    
-    if (currentScript && currentScript.src) {
-        const url = new URL(currentScript.src);
-        apiBase = url.origin;
-        const params = new URLSearchParams(url.search);
-        apiKey = params.get('key');
-    }
-    
-    const response = await fetch(`${apiBase}/api/public/submit-lead?api_key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            leadData: leadData,
-            timestamp: new Date().toISOString()
-        })
-    });
-    
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
+	// Get API details from current widget
+	const currentScript =
+		document.currentScript ||
+		Array.from(document.getElementsByTagName("script")).find(
+			(s) => s.src && s.src.includes("widget.js")
+		);
+
+	let apiBase = "http://127.0.0.1:8000";
+	let apiKey = "";
+
+	if (currentScript && currentScript.src) {
+		const url = new URL(currentScript.src);
+		apiBase = url.origin;
+		const params = new URLSearchParams(url.search);
+		apiKey = params.get("key");
+	}
+
+	const response = await fetch(
+		`${apiBase}/api/public/submit-lead?api_key=${apiKey}`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				leadData: leadData,
+				timestamp: new Date().toISOString(),
+			}),
+		}
+	);
+
+	if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+	}
+
+	return await response.json();
 }
 
 function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	return emailRegex.test(email);
 }
 
 function addModalStyles(primaryColor) {
-    if (document.querySelector('#lead-modal-styles')) return;
-    
-    const styles = `
+	if (document.querySelector("#lead-modal-styles")) return;
+
+	const styles = `
         #lead-modal {
             position: fixed;
             top: 0;
@@ -391,11 +403,11 @@ function addModalStyles(primaryColor) {
             }
         }
     `;
-    
-    const styleSheet = document.createElement('style');
-    styleSheet.id = 'lead-modal-styles';
-    styleSheet.textContent = styles;
-    document.head.appendChild(styleSheet);
+
+	const styleSheet = document.createElement("style");
+	styleSheet.id = "lead-modal-styles";
+	styleSheet.textContent = styles;
+	document.head.appendChild(styleSheet);
 }
 
 // Make functions globally accessible

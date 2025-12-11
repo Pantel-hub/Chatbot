@@ -2,7 +2,7 @@
 import secrets
 import bcrypt
 import pymysql.cursors
-from datetime import datetime, timedelta,timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Literal, Dict, Any
 import uuid
 from database_connection import get_db
@@ -10,23 +10,30 @@ from database_connection import get_db
 # Τύπος για τον σκοπό του OTP
 Purpose = Literal["register", "login"]
 
+
 def now_utc() -> datetime:
     """Επιστρέφει την τρέχουσα UTC ώρα."""
     return datetime.now(timezone.utc)
+
 
 def generate_otp_code(length: int = 6) -> str:
     """Γεννάει OTP με κρυπτογραφικά ασφαλή τυχαιότητα."""
     return f"{secrets.randbelow(10**length):0{length}d}"
 
+
 def hash_otp_code(otp: str) -> str:
     """Επιστρέφει bcrypt hash του OTP."""
     return bcrypt.hashpw(otp.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
 
 def verify_otp_code(otp_code: str, otp_hash_code: str) -> bool:
     """Επαληθεύει ότι το OTP ταιριάζει με το hash."""
     return bcrypt.checkpw(otp_code.encode("utf-8"), otp_hash_code.encode("utf-8"))
 
-async def create_otp_entry(conn, verification: str, purpose: Purpose, ttl_minutes: int = 10) -> str:
+
+async def create_otp_entry(
+    conn, verification: str, purpose: Purpose, ttl_minutes: int = 10
+) -> str:
     """
     Δημιουργεί ΝΕΟ OTP για email+purpose.
     Ακυρώνει παλιότερα ενεργά και επιστρέφει το plaintext OTP.
@@ -56,7 +63,10 @@ async def create_otp_entry(conn, verification: str, purpose: Purpose, ttl_minute
     await conn.commit()
     return otp_code
 
-async def get_latest_active_otp(conn, verification: str, purpose: Purpose) -> Optional[Dict[str, Any]]:
+
+async def get_latest_active_otp(
+    conn, verification: str, purpose: Purpose
+) -> Optional[Dict[str, Any]]:
     """Φέρνει το πιο πρόσφατο ενεργό OTP."""
     try:
         async with conn.cursor() as cur:
@@ -78,13 +88,13 @@ async def get_latest_active_otp(conn, verification: str, purpose: Purpose) -> Op
         print(f"❌ Database error in get_latest_active_otp: {e}")
         raise
 
+
 async def increment_otp_attempts(conn, otp_id: int) -> None:
     """Αυξάνει το πεδίο attempts κατά 1 (async έκδοση)."""
     try:
         async with conn.cursor() as cur:
             await cur.execute(
-                "UPDATE otp_codes SET attempts = attempts + 1 WHERE id = %s",
-                (otp_id,)
+                "UPDATE otp_codes SET attempts = attempts + 1 WHERE id = %s", (otp_id,)
             )
         await conn.commit()
     except Exception as e:
@@ -96,17 +106,16 @@ async def mark_otp_used(conn, otp_id: int) -> None:
     """Μαρκάρει το OTP ως χρησιμοποιημένο (async έκδοση)."""
     try:
         async with conn.cursor() as cur:
-            await cur.execute(
-                "UPDATE otp_codes SET used = 1 WHERE id = %s",
-                (otp_id,)
-            )
+            await cur.execute("UPDATE otp_codes SET used = 1 WHERE id = %s", (otp_id,))
         await conn.commit()
     except Exception as e:
         print(f"❌ Database error in mark_otp_used: {e}")
         raise
 
 
-async def verify_and_consume_otp(conn, verification: str, purpose: Purpose, otp_code: str, *, max_attempts: int = 5) -> Dict[str, Any]:
+async def verify_and_consume_otp(
+    conn, verification: str, purpose: Purpose, otp_code: str, *, max_attempts: int = 5
+) -> Dict[str, Any]:
     """
     Επαληθεύει OTP και το μαρκάρει ως used.
     Επιστρέφει {"ok": bool, "reason": str}
@@ -119,6 +128,7 @@ async def verify_and_consume_otp(conn, verification: str, purpose: Purpose, otp_
     expires_at = row["expires_at"]
     if expires_at.tzinfo is None:
         from datetime import timezone
+
         expires_at = expires_at.replace(tzinfo=timezone.utc)
     attempts = int(row["attempts"])
     otp_hash_code = row["code"]
@@ -142,13 +152,12 @@ async def verify_and_consume_otp(conn, verification: str, purpose: Purpose, otp_
     return {"ok": True, "reason": "verified", "otp_id": otp_id}
 
 
-
 def send_otp_email(email: str, otp_code: str, purpose: str = "register"):
     """
     Στέλνει OTP email μέσω AWS SES
     """
     from AWS_HELPER import send_email  # Import εδώ για να μη χρειάζεται globally
-    
+
     # Subject ανάλογα με purpose
     if purpose == "register":
         subject = "Verify your email - AI Chatbot Builder"
@@ -156,7 +165,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "register"):
     else:  # login
         subject = "Your login code - AI Chatbot Builder"
         greeting = "Welcome back!"
-    
+
     # Email body - HTML
     body_html = f"""
     <!DOCTYPE html>
@@ -195,7 +204,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "register"):
     </body>
     </html>
     """
-    
+
     # Email body - Plain text (fallback)
     body_text = f"""
 {greeting}
@@ -210,15 +219,12 @@ If you didn't request this code, please ignore this email.
 AI Chatbot Builder
 https://aichat-builder.com
     """
-    
+
     # Αποστολή μέσω AWS SES
     result = send_email(
-        to_email=email,
-        subject=subject,
-        body_text=body_text,
-        body_html=body_html
+        to_email=email, subject=subject, body_text=body_text, body_html=body_html
     )
-    
+
     if result.get("ok"):
         print(f"✅ OTP email sent to {email} (Message ID: {result.get('message_id')})")
         return True
@@ -226,7 +232,9 @@ https://aichat-builder.com
         print(f"❌ Failed to send OTP email to {email}: {result.get('error')}")
         raise Exception(f"Email sending failed: {result.get('error')}")
 
+
 # ========== SESSION MANAGEMENT ==========#
+
 
 async def create_auth_session(conn, user_id: int, ttl_hours: int = 24) -> str:
     """
@@ -235,14 +243,14 @@ async def create_auth_session(conn, user_id: int, ttl_hours: int = 24) -> str:
     """
     session_id = str(uuid.uuid4())
     expires_at = now_utc() + timedelta(hours=ttl_hours)
-    
+
     async with conn.cursor() as cur:
         await cur.execute(
             """
             INSERT INTO auth_sessions (auth_session_id, user_id, expires_at, last_activity_at)
             VALUES (%s, %s, %s, %s)
             """,
-            (session_id, user_id, expires_at, now_utc())
+            (session_id, user_id, expires_at, now_utc()),
         )
     await conn.commit()
     return session_id
@@ -262,14 +270,14 @@ async def get_user_from_session(conn, auth_session_id: str) -> Optional[Dict[str
                 JOIN users u ON s.user_id = u.id
                 WHERE s.auth_session_id = %s AND s.expires_at > %s
                 """,
-                (auth_session_id, now_utc())
+                (auth_session_id, now_utc()),
             )
             row = await cur.fetchone()
-            
+
             if row:
                 await cur.execute(
                     "UPDATE auth_sessions SET last_activity_at = %s WHERE auth_session_id = %s",
-                    (now_utc(), auth_session_id)
+                    (now_utc(), auth_session_id),
                 )
                 await conn.commit()
                 return dict(row)
@@ -287,7 +295,7 @@ async def delete_session(conn, auth_session_id: str) -> bool:
         async with conn.cursor() as cur:
             await cur.execute(
                 "DELETE FROM auth_sessions WHERE auth_session_id = %s",
-                (auth_session_id,)
+                (auth_session_id,),
             )
         await conn.commit()
         return True
@@ -307,14 +315,16 @@ def cleanup_expired_auth_sessions(conn) -> int:
     conn.commit()
     return deleted
 
+
 # ========== SMS SENDING (PLACEHOLDER) ==========#
 def send_otp_sms(phone: str, otp_code: str, purpose: str = "register"):
     from twilio_helper import send_sms
+
     if purpose == "register":
         greeting = "AI Chatbot Builder 🤖 - Registration"
     else:  # login
         greeting = "AI Chatbot Builder 🤖 - Login"
-    
+
     message_body = f"""
     {greeting}
 
@@ -336,7 +346,9 @@ def send_otp_sms(phone: str, otp_code: str, purpose: str = "register"):
 
 
 # ========== UNIVERSAL CONTACT HELPER ==========#
-def send_otp_to_contact(contact: str, otp_code: str, method: str, purpose: str = "register"):
+def send_otp_to_contact(
+    contact: str, otp_code: str, method: str, purpose: str = "register"
+):
     """
     Στέλνει OTP στο σωστό μέσο (email ή SMS)
     """

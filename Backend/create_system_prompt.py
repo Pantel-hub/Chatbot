@@ -19,6 +19,7 @@ append exactly one JSON ACTION block at the end of your response.
 </ACTION>
 """
 
+
 def get_appointment_prompt_template(mode: str, booking_page_url: str = None) -> str:
     """
     Δημιουργεί appointment prompt ανάλογα με το mode
@@ -64,19 +65,21 @@ When a user wants to book an appointment, append exactly one JSON ACTION block a
 """
 
 
-
-def create_system_prompt(company_name: str,
-                         bot_name: str,
-                         description: str, 
-                         personaSelect: str, botRestrictions: str = "", 
-                          botTypePreset: str = "",
-                         coreFeatures: dict = None,
-                         leadCaptureFields: dict = None,
-                         appointmentSettings: dict = None) -> str:  # 🆕 ΠΡΟΣΘΗΚΗ
+def create_system_prompt(
+    company_name: str,
+    bot_name: str,
+    description: str,
+    personaSelect: str,
+    botRestrictions: str = "",
+    botTypePreset: str = "",
+    coreFeatures: dict = None,
+    leadCaptureFields: dict = None,
+    appointmentSettings: dict = None,
+) -> str:  # 🆕 ΠΡΟΣΘΗΚΗ
     """
     Δημιουργεί system prompt ανάλογα με το bot type preset
     """
-    
+
     # Κοινό μέρος για όλα τα bot types
     base_prompt = f"""You are {bot_name}, the AI assistant for {company_name}.
 
@@ -224,7 +227,7 @@ If the answer requires more detail, provide an initial section
 and close with: "Would you like me to guide you through the next part?"
 """
     else:
-    # Default behavior αν δεν έχει επιλεγεί bot type
+        # Default behavior αν δεν έχει επιλεγεί bot type
         specialized_prompt = """
 === GENERAL BOT BEHAVIOR ===
 You are a helpful assistant representing the company.
@@ -247,41 +250,39 @@ and close with: "Would you like me to continue with more details?"
         appointmentSettings = appointmentSettings or {}
         mode = appointmentSettings.get("mode", "bot_managed")
         booking_page_url = appointmentSettings.get("booking_page_url", "")
-    
+
         # Δημιούργησε το σωστό prompt ανάλογα με mode
         appointment_prompt = get_appointment_prompt_template(mode, booking_page_url)
-    
+
     print("=== PROMPT INPUT DEBUG ===")
     print("coreFeatures:", coreFeatures)
     print("leadCaptureFields(raw):", leadCaptureFields)
-    
+
     leadCaptureFields = leadCaptureFields or {}
     active_fields = [f for f, enabled in leadCaptureFields.items() if enabled]
-    
+
     print("leadCaptureFields(normalized):", leadCaptureFields)
     print("active_fields:", active_fields)
-
 
     lead_capture_prompt = ""
     if coreFeatures and coreFeatures.get("leadCapture"):
         if not active_fields:  # fallback όταν δεν ορίστηκαν πεδία
             active_fields = ["name", "email"]
-        
+
         # Δημιουργούμε και τις δύο εκδόσεις που χρειαζόμαστε
         active_fields_str = ", ".join(active_fields)  # για την εμφάνιση στους κανόνες
         active_fields_json = json.dumps(active_fields)  # για το JSON
-        
+
         lead_capture_prompt = lead_capture_prompt_template.format(
-            active_fields=active_fields_str,
-            active_fields_json=active_fields_json
+            active_fields=active_fields_str, active_fields_json=active_fields_json
         )
-    
+
     full_prompt = base_prompt + specialized_prompt
     if lead_capture_prompt:
         full_prompt += lead_capture_prompt
     if appointment_prompt:
         full_prompt += appointment_prompt
-    
+
     # Στο create_system_prompt.py, πριν το return:
     print("=== SYSTEM PROMPT DEBUG ===")
     if coreFeatures and coreFeatures.get("appointmentScheduling"):
@@ -292,6 +293,3 @@ and close with: "Would you like me to continue with more details?"
     print("=== END DEBUG ===")
 
     return full_prompt
-
-
-
