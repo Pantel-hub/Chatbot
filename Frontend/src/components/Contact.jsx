@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowLeft, Mail, Phone, MapPin } from "lucide-react";
+import chatbotLogo from "../assets/chatbot_logo.svg";
 import { useTranslation } from "react-i18next";
 
 export default function Contact({ onBack }) {
@@ -19,7 +20,11 @@ export default function Contact({ onBack }) {
               <span className="hidden xs:inline">{t("contact.back")}</span>
             </button>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600" />
+              <img
+                src={chatbotLogo}
+                alt="Chatbot Logo"
+                className="h-7 w-7 sm:h-9 sm:w-9"
+              />
               <span className="text-base sm:text-lg font-bold tracking-tight">grimbot</span>
             </div>
           </div>
@@ -73,15 +78,22 @@ export default function Contact({ onBack }) {
 
       {/* Footer */}
       <footer className="mt-auto border-t border-gray-200 bg-white/70 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600" />
-              <span className="font-semibold text-gray-900">grimbot</span>
-            </div>
-            <p className="text-sm text-gray-600">
-              © {new Date().getFullYear()} grimbot. {t("contact.footer")}
+        <div className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+              © {new Date().getFullYear()} {t("landing.brand", "Grimbot")}. {t("landing.footer.allRights", "All rights reserved.")}
             </p>
+            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors">
+                {t("landing.footer.privacy", "Privacy")}
+              </button>
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors">
+                {t("landing.footer.terms", "Terms")}
+              </button>
+              <button className="text-gray-600 hover:text-indigo-600 transition-colors">
+                {t("landing.footer.support", "Support")}
+              </button>
+            </div>
           </div>
         </div>
       </footer>
