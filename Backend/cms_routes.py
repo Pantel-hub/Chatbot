@@ -176,13 +176,28 @@ async def process_files_in_background(
                             f"✅ Background: All files processed successfully for chatbot {chatbot_id}"
                         )
 
-                        # Update database with file IDs
+                        # Update database with file IDs (as proper dict format)
                         try:
+                            # Convert list of file IDs to proper dict format with metadata
+                            file_ids_dict = {}
+                            for idx, file_id in enumerate(uploaded_file_ids):
+                                if idx == 0 and len(local_file_paths) > 0:
+                                    # First file might be FAQ
+                                    file_key = local_file_paths[idx].get('filename_key', f'file_{idx}')
+                                else:
+                                    file_key = local_file_paths[idx].get('filename_key', f'file_{idx}') if idx < len(local_file_paths) else f'file_{idx}'
+                                
+                                file_ids_dict[file_key] = {
+                                    "file_id": file_id,
+                                    "filename": local_file_paths[idx].get('filename', file_key) if idx < len(local_file_paths) else file_key,
+                                    "type": "user_file"
+                                }
+                            
                             async with get_db() as conn:
                                 async with conn.cursor() as cursor:
                                     await cursor.execute(
                                         "UPDATE assistant_configs SET openai_file_ids = %s WHERE chatbot_id = %s",
-                                        (json.dumps(uploaded_file_ids), chatbot_id),
+                                        (json.dumps(file_ids_dict), chatbot_id),
                                     )
                                 await conn.commit()
                         except Exception as db_error:
@@ -1532,9 +1547,18 @@ async def update_chatbot(
             config_row = await cursor_config.fetchone()
 
             vector_store_id = config_row["vector_store_id"] if config_row else None
-            existing_file_ids = (
-                json.loads(config_row["openai_file_ids"] or "{}") if config_row else {}
-            )
+            existing_file_ids_raw = config_row["openai_file_ids"] if config_row else None
+            
+            # Handle both old list format and new dict format
+            if existing_file_ids_raw:
+                try:
+                    parsed = json.loads(existing_file_ids_raw)
+                    # If it's a list (old format), convert to empty dict
+                    existing_file_ids = parsed if isinstance(parsed, dict) else {}
+                except:
+                    existing_file_ids = {}
+            else:
+                existing_file_ids = {}
 
     # 9.2) Δράση: Μόνο αν υπάρχει Vector Store ID ΚΑΙ (νέα αρχεία Ή rescrape/edit)
     if (
@@ -1762,16 +1786,28 @@ async def get_chatbot_files(
 
                 openai_file_ids = json.loads(
                     config_row["openai_file_ids"]
-                )  # μετατροπή σε dict
+                )  # Convert to dict or list
 
         # 3. Filter μόνο user files (όχι website_data)
         user_files = []
-        for filename, file_data in openai_file_ids.items():
-            if isinstance(file_data, dict) and file_data.get("type") == "user_file":
+        
+        # Handle both dict and list formats
+        if isinstance(openai_file_ids, dict):
+            for filename, file_data in openai_file_ids.items():
+                if isinstance(file_data, dict) and file_data.get("type") == "user_file":
+                    user_files.append(
+                        {
+                            "filename": file_data.get("filename", filename),
+                            "uploaded_at": file_data.get("uploaded_at", ""),
+                        }
+                    )
+        elif isinstance(openai_file_ids, list):
+            # Old format: just list of file IDs, no metadata
+            for file_id in openai_file_ids:
                 user_files.append(
                     {
-                        "filename": file_data.get("filename", filename),
-                        "uploaded_at": file_data.get("uploaded_at", ""),
+                        "filename": file_id,
+                        "uploaded_at": "",
                     }
                 )
 
