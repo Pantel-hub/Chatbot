@@ -1131,7 +1131,7 @@ async def create_chatbot_unified(
                 [],  # Empty list - no files yet
             )
             vector_store_id = knowledge_result["vector_store_id"]
-            openai_file_ids = []  # Files will be added in background
+            openai_file_ids = []  # Will be updated after files process
 
         except Exception as e:
             # Cleanup temp files if vector store creation fails
@@ -1141,6 +1141,37 @@ async def create_chatbot_unified(
             raise HTTPException(
                 status_code=500, detail=f"Knowledge processing failed: {str(e)}"
             )
+
+        # === Process user files BEFORE creating assistant ===
+        # This ensures files are indexed before the assistant starts using them
+        if local_file_paths:
+            try:
+                logger.info(f"🔄 Processing {len(local_file_paths)} files synchronously before assistant creation...")
+                file_processing_result = await to_thread.run_sync(
+                    update_vector_store_blocking,
+                    vector_store_id,
+                    {},  # existing_file_ids empty dict
+                    None,  # website_data
+                    local_file_paths,  # user files
+                    False,  # update_website
+                    bool(faq_text.strip()) if faq_text else False,  # update_faq
+                    (faq_text if (faq_text and faq_text.strip()) else None),
+                )
+                openai_file_ids = file_processing_result.get("openai_file_ids", {})
+                logger.info(f"✅ Files processed and indexed before assistant creation")
+                
+            except Exception as e:
+                logger.warning(f"⚠️ File processing encountered an issue: {e}")
+                # Continue with empty files rather than blocking assistant creation
+                openai_file_ids = {}
+            finally:
+                # Cleanup temp files
+                for temp_path in temp_files_to_cleanup:
+                    try:
+                        if os.path.exists(temp_path):
+                            os.unlink(temp_path)
+                    except Exception as e:
+                        logger.warning(f"Failed to delete temp file {temp_path}: {e}")
 
         # Δημιουργία API Key
         api_key = generate_api_key()
@@ -1242,21 +1273,7 @@ async def create_chatbot_unified(
                 f"User {user_id} linked to chatbot api_key={api_key}, id={company_id}"
             )
 
-        # === Schedule background file processing ===#
-        if local_file_paths:
-            print(
-                f"📤 Scheduling background processing for {len(local_file_paths)} files"
-            )
-            background_tasks.add_task(
-                process_files_in_background,
-                company_id,
-                assistant_id,
-                vector_store_id,
-                local_file_paths,
-                temp_files_to_cleanup,
-            )
-        else:
-            # No files to process, cleanup immediately
+        # Files are already processed synchronously above - no background task needed
             for temp_path in temp_files_to_cleanup:
                 try:
                     if os.path.exists(temp_path):
