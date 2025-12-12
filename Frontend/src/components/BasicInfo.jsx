@@ -564,7 +564,6 @@ export default function BasicInfo({
 											: normalClasses
 									}`}
 									placeholder={t("placeholders.domain")}
-									pattern="^([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$"
 									inputMode="url"
 									disabled={disabled}
 								/>

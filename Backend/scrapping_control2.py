@@ -196,33 +196,6 @@ class ScrapingController:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(self.executor, self._scrape_single_page, url)
 
-    def scrape_to_json(
-        self, url: str, save_to_file: bool = False, filename: str = None
-    ) -> str:
-        """
-        Scrape website και επιστρέφει JSON string
-
-        Args:
-            url: Το URL για scraping
-            save_to_file: Αν True, αποθηκεύει σε αρχείο
-            filename: Όνομα αρχείου (προαιρετικό)
-
-        Returns:
-            JSON string με τα αποτελέσματα
-        """
-        result = self.scrape_website(url)
-        json_output = json.dumps(result, indent=2, ensure_ascii=False)
-
-        if save_to_file:
-            if not filename:
-                filename = f"scraping_results_{int(time.time())}.json"
-
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write(json_output)
-            print(f"Results saved to: {filename}")
-
-        return json_output
-
     def test_scraper(self, test_url: str = "https://example.com"):
         print(f"Testing ScrapingController with URL: {test_url}")
         print("=" * 50)

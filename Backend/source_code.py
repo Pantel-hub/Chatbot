@@ -1,101 +1,45 @@
 # source_code.py
 
-import os
-from brightdata import client
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 def get_website_source_code(url, headless=True):
     """
-    Κάνει αίτημα στη Bright Data για να πάρει το HTML κείμενο της σελίδας.
-    Χρησιμοποιεί Web Unlocker zone/country από μεταβλητές περιβάλλοντος.
+    Fetches the HTML source code of a website using requests.
+    Free alternative to paid scraping services.
 
     Args:
-        url: Το URL της σελίδας
-        wait_for_dynamic_content_seconds: Ignored (για compatibility με παλιό API)
-        headless: Ignored (για compatibility με παλιό API)
+        url: The URL of the page to scrape
+        headless: Ignored (for compatibility)
 
     Returns:
-        str: Το HTML content της σελίδας
+        str: The HTML content of the page
     """
-    api_key = os.getenv("BRIGHTDATA_API_KEY")
-    if not api_key:
-        raise ValueError("Λείπει το BRIGHTDATA_API_KEY στο περιβάλλον.")
+    # Configure session with retries
+    session = requests.Session()
+    retry = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+
+    # Set headers to mimic a real browser
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+    }
 
     try:
-        client = client(api_token=api_key)
-    except Exception as e:
-        raise RuntimeError(f"Σφάλμα αρχικοποίησης Bright Data client: {e}")
+        response = session.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
 
-    try:
-        # Κλήση Bright Data API (ΧΩΡΙΣ format="json" που δίνει error)
-        results = client.scrape(
-            url=[url],
-            timeout=60,
-            zone=os.getenv("BD_ZONE", "sdk_unlocker"),
-            country=os.getenv("BD_COUNTRY", "gr"),
-            method="GET",
-        )
-    except Exception as e:
-        raise RuntimeError(f"Σφάλμα κλήσης Bright Data API: {e}")
+        # Return the HTML content
+        return response.text
 
-    # Χειρισμός response
-    # Το Bright Data SDK επιστρέφει: list[str] ή dict με 'results'
-
-    if isinstance(results, dict) and "results" in results:
-        # Format: {"results": [...]}
-        results = results["results"]
-
-    if not results:
-        raise RuntimeError(f"Bright Data API: Empty response για URL: {url}")
-
-    if not isinstance(results, list):
-        raise RuntimeError(
-            f"Bright Data API: Unexpected response type: {type(results)}"
-        )
-
-    first_result = results[0]
-
-    # Case 1: Το response είναι απλό HTML string
-    if isinstance(first_result, str):
-        # Validation ότι μοιάζει με HTML
-        if first_result.strip().startswith(("<!DOCTYPE", "<html", "<HTML")):
-            return first_result
-        else:
-            # Μπορεί να είναι HTML χωρίς DOCTYPE
-            if "<html" in first_result.lower()[:200]:
-                return first_result
-            else:
-                raise RuntimeError(
-                    f"Bright Data API: Response δεν φαίνεται να είναι HTML"
-                )
-
-    # Case 2: Το response είναι dict με metadata
-    elif isinstance(first_result, dict):
-        # Έλεγχος status code αν υπάρχει
-        status_code = first_result.get("status_code")
-        if status_code and status_code != 200:
-            error_text = first_result.get("error_message", "Unknown API Error")
-            raise RuntimeError(
-                f"Bright Data API error {status_code}: {error_text[:200]}"
-            )
-
-        # Εξαγωγή HTML από πιθανά fields
-        html_content = (
-            first_result.get("content")
-            or first_result.get("html")
-            or first_result.get("body")
-        )
-
-        if not html_content:
-            available_keys = list(first_result.keys())
-            raise RuntimeError(
-                f"Bright Data API: Δεν βρέθηκε HTML content. "
-                f"Available keys: {available_keys}"
-            )
-
-        return html_content
-
-    else:
-        raise RuntimeError(
-            f"Bright Data API: Unexpected item type στο response: {type(first_result)}"
-        )
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Failed to fetch URL {url}: {str(e)}")

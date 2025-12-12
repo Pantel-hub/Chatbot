@@ -27,6 +27,7 @@ from fastapi import (
     Cookie,
     Depends,
     APIRouter,
+    BackgroundTasks,
 )
 from fastapi.responses import (
     StreamingResponse,
@@ -116,6 +117,96 @@ async def get_user_usage_stats():
 
 
 load_dotenv()
+
+
+# Background task for processing files asynchronously
+async def process_files_in_background(
+    chatbot_id: int,
+    assistant_id: str,
+    vector_store_id: str,
+    local_file_paths: List[Dict],
+    temp_files_to_cleanup: List[str],
+):
+    """
+    Process uploaded files in the background after chatbot creation.
+    Uploads files to OpenAI and adds them to the vector store.
+    """
+    try:
+        print(
+            f"🔄 Background: Processing {len(local_file_paths)} files for chatbot {chatbot_id}"
+        )
+
+        # Upload files to OpenAI and wait for processing
+        uploaded_file_ids = []
+        for file_info in local_file_paths:
+            try:
+                with open(file_info["path"], "rb") as f:
+                    openai_file = openai_client.files.create(
+                        file=f, purpose="assistants"
+                    )
+                    uploaded_file_ids.append(openai_file.id)
+                    print(
+                        f"✅ Background: Uploaded file {file_info['filename_key']} -> {openai_file.id}"
+                    )
+            except Exception as e:
+                print(
+                    f"❌ Background: Failed to upload file {file_info['filename_key']}: {e}"
+                )
+
+        if uploaded_file_ids:
+            # Add files to vector store
+            try:
+                file_batch = openai_client.beta.vector_stores.file_batches.create(
+                    vector_store_id=vector_store_id, file_ids=uploaded_file_ids
+                )
+                print(f"🔄 Background: File batch created: {file_batch.id}")
+
+                # Poll until processing is complete
+                max_wait = 600  # 10 minutes max
+                start_time = time.time()
+                while time.time() - start_time < max_wait:
+                    batch_status = (
+                        openai_client.beta.vector_stores.file_batches.retrieve(
+                            vector_store_id=vector_store_id, batch_id=file_batch.id
+                        )
+                    )
+
+                    if batch_status.status == "completed":
+                        print(
+                            f"✅ Background: All files processed successfully for chatbot {chatbot_id}"
+                        )
+
+                        # Update database with file IDs
+                        async with get_db() as conn:
+                            async with conn.cursor() as cursor:
+                                await cursor.execute(
+                                    "UPDATE assistant_configs SET file_ids = %s WHERE chatbot_id = %s",
+                                    (json.dumps(uploaded_file_ids), chatbot_id),
+                                )
+                            await conn.commit()
+                        break
+                    elif batch_status.status == "failed":
+                        print(
+                            f"❌ Background: File batch processing failed for chatbot {chatbot_id}"
+                        )
+                        break
+
+                    await asyncio.sleep(2)  # Poll every 2 seconds
+
+            except Exception as e:
+                print(f"❌ Background: Failed to create file batch: {e}")
+
+    except Exception as e:
+        print(f"❌ Background: Error processing files for chatbot {chatbot_id}: {e}")
+    finally:
+        # Cleanup temp files
+        for temp_path in temp_files_to_cleanup:
+            try:
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
+                    print(f"🗑️ Background: Cleaned up temp file {temp_path}")
+            except Exception as e:
+                print(f"⚠️ Background: Failed to delete temp file {temp_path}: {e}")
 
 
 logging.basicConfig(level=logging.INFO)
@@ -857,6 +948,7 @@ async def chat_with_company(
 
 @router.post("/create_chatbot")
 async def create_chatbot_unified(
+    background_tasks: BackgroundTasks,
     user_data: dict = Depends(get_current_user),
     company_info: str = Form(...),
     files: List[UploadFile] = File(default=[]),
@@ -864,6 +956,11 @@ async def create_chatbot_unified(
     botAvatar: UploadFile = File(None),  # ← Bot avatar
 ):
     try:
+        print("=" * 60)
+        print("🚀 create_chatbot_unified endpoint called!")
+        print(f"📋 User: {user_data}")
+        print(f"📄 company_info raw: {company_info[:200]}...")
+        print("=" * 60)
 
         # Parse το JSON string
         company_data = json.loads(company_info)
@@ -970,21 +1067,16 @@ async def create_chatbot_unified(
 
         ### END SCRAPE WEBSITE ###
 
-        #  Προετοιμασία files για OpenAI ===
+        #  Προετοιμασία files για OpenAI (async processing) ===
         local_file_paths = []  # λίστα με dictionaries που περιγράφουν κάθε αρχείο
-        temp_files_to_cleanup = (
-            []
-        )  # λίστα για να ξέρω ποια temp files να διαγράψεις ,  κρατάει μόνο path
+        temp_files_to_cleanup = []  # λίστα για να ξέρω ποια temp files να διαγράψεις
 
+        # Save uploaded files to temp directory for background processing
         for file in files:
-            temp_file = NamedTemporaryFile(
-                delete=False, suffix=f"_{file.filename}"
-            )  # δημιουργεί προσωρινό αρχείο
+            temp_file = NamedTemporaryFile(delete=False, suffix=f"_{file.filename}")
             await file.seek(0)
-            content = (
-                await file.read()
-            )  # διαβάζει το αρχείο το αποθηκευει στην μεταβλητή content
-            temp_file.write(content)  # γράφει το content στο προσωρίνο αρχείο
+            content = await file.read()
+            temp_file.write(content)
             temp_file.close()
 
             local_file_paths.append(
@@ -996,32 +1088,35 @@ async def create_chatbot_unified(
             )
             temp_files_to_cleanup.append(temp_file.name)
 
-        # === δημιουργία vector_store,upload files to openai,indexing ===
+        # Save FAQ to temp file if present
         if faq_text and faq_text.strip():
             tmp_faq = NamedTemporaryFile(delete=False, suffix="_faq_data.txt")
-            tmp_faq.write(faq_text.encode("utf-8"))  # γράφουμε text ως bytes
+            tmp_faq.write(faq_text.encode("utf-8"))
             tmp_faq.close()
 
             local_file_paths.append(
                 {
                     "path": tmp_faq.name,
-                    "type": "user_file",  # θα χαρακτηριστεί ως "faq" στον helper λόγω filename_key
+                    "type": "user_file",
                     "filename_key": "faq_data",
                 }
             )
             temp_files_to_cleanup.append(tmp_faq.name)
+
+        # === Create vector store with website data only (instant) ===
         try:
+            # Process only website data synchronously (fast)
             knowledge_result = await to_thread.run_sync(
                 process_knowledge_blocking,
                 company_info_obj.companyName,
                 website_data,
-                local_file_paths,
+                [],  # Empty list - no files yet
             )
             vector_store_id = knowledge_result["vector_store_id"]
-            openai_file_ids = knowledge_result["openai_file_ids"]
+            openai_file_ids = []  # Files will be added in background
 
         except Exception as e:
-            # Cleanup temp files αν αποτύχει
+            # Cleanup temp files if vector store creation fails
             for temp_path in temp_files_to_cleanup:
                 if os.path.exists(temp_path):
                     os.unlink(temp_path)
@@ -1129,13 +1224,27 @@ async def create_chatbot_unified(
                 f"User {user_id} linked to chatbot api_key={api_key}, id={company_id}"
             )
 
-        # === Cleanup temp files ===#
-        for temp_path in temp_files_to_cleanup:
-            try:
-                if os.path.exists(temp_path):
-                    os.unlink(temp_path)
-            except Exception as e:
-                logger.warning(f"Failed to delete temp file {temp_path}: {e}")
+        # === Schedule background file processing ===#
+        if local_file_paths:
+            print(
+                f"📤 Scheduling background processing for {len(local_file_paths)} files"
+            )
+            background_tasks.add_task(
+                process_files_in_background,
+                company_id,
+                assistant_id,
+                vector_store_id,
+                local_file_paths,
+                temp_files_to_cleanup,
+            )
+        else:
+            # No files to process, cleanup immediately
+            for temp_path in temp_files_to_cleanup:
+                try:
+                    if os.path.exists(temp_path):
+                        os.unlink(temp_path)
+                except Exception as e:
+                    logger.warning(f"Failed to delete temp file {temp_path}: {e}")
         # ===....===#
 
         return {
@@ -1145,6 +1254,8 @@ async def create_chatbot_unified(
             "chatbot_id": company_id,
             "api_key": api_key,
             "status": "success",
+            "files_processing": len(local_file_paths)
+            > 0,  # Indicate if files are being processed
         }
 
     except Exception as e:
