@@ -559,7 +559,7 @@ async def run_assistant_on_thread(thread_id: str, assistant_id: str):
         logger.info(f"🤖 Running assistant {assistant_id} on thread {thread_id}")
 
         async with async_openai_client.beta.threads.runs.stream(
-            thread_id=thread_id, assistant_id=assistant_id, temperature=0.7
+            thread_id=thread_id, assistant_id=assistant_id, temperature=0.2
         ) as stream:
             async for event in stream:
                 # Streaming events από το OpenAI
