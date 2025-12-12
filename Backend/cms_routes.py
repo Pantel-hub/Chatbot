@@ -177,13 +177,16 @@ async def process_files_in_background(
                         )
 
                         # Update database with file IDs
-                        async with get_db() as conn:
-                            async with conn.cursor() as cursor:
-                                await cursor.execute(
-                                    "UPDATE assistant_configs SET file_ids = %s WHERE chatbot_id = %s",
-                                    (json.dumps(uploaded_file_ids), chatbot_id),
-                                )
-                            await conn.commit()
+                        try:
+                            async with get_db() as conn:
+                                async with conn.cursor() as cursor:
+                                    await cursor.execute(
+                                        "UPDATE assistant_configs SET openai_file_ids = %s WHERE chatbot_id = %s",
+                                        (json.dumps(uploaded_file_ids), chatbot_id),
+                                    )
+                                await conn.commit()
+                        except Exception as db_error:
+                            print(f"⚠️ Background: Non-critical DB error saving file IDs: {db_error}")
                         break
                     elif batch_status.status == "failed":
                         print(
