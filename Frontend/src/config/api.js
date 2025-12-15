@@ -31,6 +31,13 @@ export const API_ENDPOINTS = {
 	calendarAuth: (apiKey) => `${BASE_URL}/api/public/calendar-auth/${apiKey}`,
 	availableSlots: (apiKey, date) =>
 		`${BASE_URL}/api/public/available-slots/${apiKey}?date=${date}`,
+
+	// Face Recognition endpoints
+	registerFace: `${BASE_URL}/api/face/register`,
+	faceLogin: `${BASE_URL}/api/face/login`,
+	verifyFace: `${BASE_URL}/api/face/verify`,
+	faceStatus: `${BASE_URL}/api/face/status`,
+	deleteFace: `${BASE_URL}/api/face/delete`,
 };
 
 export { BASE_URL };

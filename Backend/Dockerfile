@@ -1,12 +1,19 @@
-# Use Python 3.13 slim image (smaller size)
-FROM python:3.13-slim
+# Use Python 3.11 slim image (TensorFlow doesn't support 3.13 yet)
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies needed for Python packages
+# Install system dependencies needed for Python packages and face recognition
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    libgomp1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libgl1 \
+    libgthread-2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (for better layer caching)

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Mail, Shield, Globe, Smartphone } from "lucide-react";
+import { Mail, Shield, Globe, Smartphone, Camera } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { API_ENDPOINTS } from "../config/api";
+import FaceCapture from "./FaceCapture";
 
 /**
  * Full-page OTP login (email + 6-digit code)
@@ -15,10 +16,11 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 	const { t, i18n } = useTranslation();
 
 	const [contact, setContact] = useState("");
-	const [contactMethod, setContactMethod] = useState("email"); // 'email' ή 'phone'
+	const [contactMethod, setContactMethod] = useState("email"); // 'email', 'phone', or 'camera'
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [otp, setOtp] = useState("");
 	const [otpSent, setOtpSent] = useState(false);
+	const [showFaceCapture, setShowFaceCapture] = useState(false);
 
 	const [isSendingOtp, setIsSendingOtp] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +63,33 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 			setError(err.message);
 		} finally {
 			setIsSendingOtp(false);
+		}
+	};
+
+	const handleFaceLogin = async (imageData) => {
+		setError("");
+		setIsLoading(true);
+		setShowFaceCapture(false);
+
+		try {
+			const res = await fetch(API_ENDPOINTS.faceLogin, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ image: imageData }),
+			});
+
+			const data = await res.json();
+
+			if (!res.ok) {
+				throw new Error(data.detail || "Face login failed");
+			}
+
+			// Επιτυχής σύνδεση με face
+			if (typeof onSubmit === "function") onSubmit();
+		} catch (err) {
+			setError(err.message);
+			setIsLoading(false);
 		}
 	};
 
@@ -148,32 +177,44 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 					onSubmit={handleSubmit}
 					className="p-8 bg-transparent space-y-6"
 				>
-					{/* Tabs για Email/Phone */}
+					{/* Tabs για Email/Phone/Camera */}
 					{!otpSent && (
 						<div className="flex bg-gray-100 rounded-lg p-1">
 							<button
 								type="button"
 								onClick={() => setContactMethod("email")}
-								className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md transition-all ${
+								className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all text-sm ${
 									contactMethod === "email"
 										? "bg-white text-indigo-600 shadow-sm font-semibold"
 										: "text-gray-600 hover:text-gray-900"
 								}`}
 							>
 								<Mail className="h-4 w-4" />
-								Email
+								<span className="hidden sm:inline">Email</span>
 							</button>
 							<button
 								type="button"
 								onClick={() => setContactMethod("phone")}
-								className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md transition-all ${
+								className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all text-sm ${
 									contactMethod === "phone"
 										? "bg-white text-indigo-600 shadow-sm font-semibold"
 										: "text-gray-600 hover:text-gray-900"
 								}`}
 							>
 								<Smartphone className="h-4 w-4" />
-								Τηλέφωνο
+								<span className="hidden sm:inline">Phone</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => setShowFaceCapture(true)}
+								className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-md transition-all text-sm ${
+									contactMethod === "camera"
+										? "bg-white text-indigo-600 shadow-sm font-semibold"
+										: "text-gray-600 hover:text-gray-900"
+								}`}
+							>
+								<Camera className="h-4 w-4" />
+								<span className="hidden sm:inline">Face</span>
 							</button>
 						</div>
 					)}
@@ -327,6 +368,15 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 					</button>
 				</form>
 			</div>
+
+			{/* Face Capture Modal */}
+			{showFaceCapture && (
+				<FaceCapture
+					onCapture={handleFaceLogin}
+					onCancel={() => setShowFaceCapture(false)}
+					mode="login"
+				/>
+			)}
 		</div>
 	);
 }

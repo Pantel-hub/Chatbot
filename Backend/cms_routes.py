@@ -183,16 +183,28 @@ async def process_files_in_background(
                             for idx, file_id in enumerate(uploaded_file_ids):
                                 if idx == 0 and len(local_file_paths) > 0:
                                     # First file might be FAQ
-                                    file_key = local_file_paths[idx].get('filename_key', f'file_{idx}')
+                                    file_key = local_file_paths[idx].get(
+                                        "filename_key", f"file_{idx}"
+                                    )
                                 else:
-                                    file_key = local_file_paths[idx].get('filename_key', f'file_{idx}') if idx < len(local_file_paths) else f'file_{idx}'
-                                
+                                    file_key = (
+                                        local_file_paths[idx].get(
+                                            "filename_key", f"file_{idx}"
+                                        )
+                                        if idx < len(local_file_paths)
+                                        else f"file_{idx}"
+                                    )
+
                                 file_ids_dict[file_key] = {
                                     "file_id": file_id,
-                                    "filename": local_file_paths[idx].get('filename', file_key) if idx < len(local_file_paths) else file_key,
-                                    "type": "user_file"
+                                    "filename": (
+                                        local_file_paths[idx].get("filename", file_key)
+                                        if idx < len(local_file_paths)
+                                        else file_key
+                                    ),
+                                    "type": "user_file",
                                 }
-                            
+
                             async with get_db() as conn:
                                 async with conn.cursor() as cursor:
                                     await cursor.execute(
@@ -201,7 +213,9 @@ async def process_files_in_background(
                                     )
                                 await conn.commit()
                         except Exception as db_error:
-                            print(f"⚠️ Background: Non-critical DB error saving file IDs: {db_error}")
+                            print(
+                                f"⚠️ Background: Non-critical DB error saving file IDs: {db_error}"
+                            )
                         break
                     elif batch_status.status == "failed":
                         print(
@@ -479,6 +493,7 @@ class VerifyOtpRequest(BaseModel):
     otp_code: str
     first_name: str
     last_name: str
+    skip_otp_verify: bool = False  # For face registration
 
 
 async def get_current_user(auth_session_id: str = Cookie(None)):
@@ -676,7 +691,6 @@ async def send_otp(request: SendOtpRequest):
                     )
 
             otp_code = await create_otp_entry(conn, request.contact, purpose="register")
-            print(f"🔐 DEBUG OTP (: {otp_code}")
 
         # Αποστολή στο σωστό μέσο
         from auth import send_otp_to_contact
@@ -704,28 +718,32 @@ async def verify_otp(response: Response, request: VerifyOtpRequest):
     """
     Επαληθεύει το OTP, δημιουργεί user και session, στέλνει cookie.
     """
+    logger.info(f"verify_otp called with skip_otp_verify={request.skip_otp_verify}")
     try:
         async with get_db() as conn:
-            # 1) Επαλήθευση OTP
-            result = await verify_and_consume_otp(
-                conn,
-                verification=request.contact,
-                purpose="register",
-                otp_code=request.otp_code,
-                max_attempts=5,
-            )
-
-            if not result["ok"]:
-                error_messages = {
-                    "no_active_code": "Δεν βρέθηκε ενεργός κωδικός OTP",
-                    "too_many_attempts": "Πάρα πολλές προσπάθειες. Ζήτησε νέο OTP",
-                    "expired": "Ο κωδικός έχει λήξει",
-                    "invalid_code": "Λάθος κωδικός OTP",
-                }
-                raise HTTPException(
-                    status_code=400,
-                    detail=error_messages.get(result["reason"], "Η επαλήθευση απέτυχε"),
+            # 1) Επαλήθευση OTP (skip for face registration)
+            if not request.skip_otp_verify:
+                result = await verify_and_consume_otp(
+                    conn,
+                    verification=request.contact,
+                    purpose="register",
+                    otp_code=request.otp_code,
+                    max_attempts=5,
                 )
+
+                if not result["ok"]:
+                    error_messages = {
+                        "no_active_code": "Δεν βρέθηκε ενεργός κωδικός OTP",
+                        "too_many_attempts": "Πάρα πολλές προσπάθειες. Ζήτησε νέο OTP",
+                        "expired": "Ο κωδικός έχει λήξει",
+                        "invalid_code": "Λάθος κωδικός OTP",
+                    }
+                    raise HTTPException(
+                        status_code=400,
+                        detail=error_messages.get(
+                            result["reason"], "Η επαλήθευση απέτυχε"
+                        ),
+                    )
 
             # 2) Δημιουργία χρήστη
             async with conn.cursor() as cursor:
@@ -1146,7 +1164,9 @@ async def create_chatbot_unified(
         # This ensures files are indexed before the assistant starts using them
         if local_file_paths:
             try:
-                logger.info(f"🔄 Processing {len(local_file_paths)} files synchronously before assistant creation...")
+                logger.info(
+                    f"🔄 Processing {len(local_file_paths)} files synchronously before assistant creation..."
+                )
                 file_processing_result = await to_thread.run_sync(
                     update_vector_store_blocking,
                     vector_store_id,
@@ -1159,7 +1179,7 @@ async def create_chatbot_unified(
                 )
                 openai_file_ids = file_processing_result.get("openai_file_ids", {})
                 logger.info(f"✅ Files processed and indexed before assistant creation")
-                
+
             except Exception as e:
                 logger.warning(f"⚠️ File processing encountered an issue: {e}")
                 # Continue with empty files rather than blocking assistant creation
@@ -1273,7 +1293,7 @@ async def create_chatbot_unified(
                 f"User {user_id} linked to chatbot api_key={api_key}, id={company_id}"
             )
 
-        # Files are already processed synchronously above - no background task needed
+            # Files are already processed synchronously above - no background task needed
             for temp_path in temp_files_to_cleanup:
                 try:
                     if os.path.exists(temp_path):
@@ -1564,8 +1584,10 @@ async def update_chatbot(
             config_row = await cursor_config.fetchone()
 
             vector_store_id = config_row["vector_store_id"] if config_row else None
-            existing_file_ids_raw = config_row["openai_file_ids"] if config_row else None
-            
+            existing_file_ids_raw = (
+                config_row["openai_file_ids"] if config_row else None
+            )
+
             # Handle both old list format and new dict format
             if existing_file_ids_raw:
                 try:
@@ -1807,7 +1829,7 @@ async def get_chatbot_files(
 
         # 3. Filter μόνο user files (όχι website_data)
         user_files = []
-        
+
         # Handle both dict and list formats
         if isinstance(openai_file_ids, dict):
             for filename, file_data in openai_file_ids.items():
