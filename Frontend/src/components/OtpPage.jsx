@@ -11,7 +11,7 @@ import { API_ENDPOINTS } from "../config/api";
  * - onSubmit: function() -> καλείται όταν γίνει επιτυχής σύνδεση
  * - onResend: optional function() -> καλείται όταν γίνεται resend OTP
  */
-export default function OtpPage({ onSubmit, onResend }) {
+export default function OtpPage({ onSubmit, onResend, onCancel }) {
 	const { t, i18n } = useTranslation();
 
 	const [contact, setContact] = useState("");
@@ -109,8 +109,22 @@ export default function OtpPage({ onSubmit, onResend }) {
 			<div className="w-full max-w-md rounded-2xl overflow-hidden bg-white shadow-xl border border-gray-100">
 				{/* Header */}
 				<div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 relative">
-					<button
-						onClick={toggleLang}
+				<button
+					type="button"
+					onClick={() => {
+						if (onCancel) {
+							onCancel();
+						}
+					}}
+					className="absolute top-4 left-4 p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+					title="Close"
+				>
+					<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+				<button
+					onClick={toggleLang}
 						className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center gap-1 text-sm"
 					>
 						<Globe className="h-4 w-4" />

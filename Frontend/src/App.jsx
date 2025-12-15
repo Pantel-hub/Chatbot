@@ -358,41 +358,42 @@ export default function App() {
 						setIsLoggedIn(true);
 						setCurrentView("dashboard");
 					}}
+				onCancel={() => setCurrentView("landing")}
+			/>
+		)}
+
+		{currentView === "dashboard" && (
+			<div className="min-h-screen bg-gradient-to-b from-white to-zinc-50">
+				<Dashboard
+					onLogout={handleLogout}
+					onCreateNewBot={handleCreateNewBot}
+					onEditBot={handleEditBot}
+					activeChatbotId={activeChatbotId}
+					onSelectBot={(id) => {
+						console.log(
+							"%c[App.jsx] 🎯 onSelectBot called",
+							"color:orange; font-weight:bold;"
+						);
+						console.log(
+							"Previous activeChatbotId:",
+							activeChatbotId
+						);
+						console.log(
+							"New selected bot ID from Dashboard:",
+							id
+						);
+
+						setActiveChatbotId(id);
+
+						console.log(
+							"%c[App.jsx] ✅ activeChatbotId updated via Dashboard click",
+							"color:green; font-weight:bold;",
+							id
+						);
+					}}
 				/>
-			)}
-
-			{currentView === "dashboard" && (
-				<div className="min-h-screen bg-gradient-to-b from-white to-zinc-50">
-					<Dashboard
-						onLogout={handleLogout}
-						onCreateNewBot={handleCreateNewBot}
-						onEditBot={handleEditBot}
-						activeChatbotId={activeChatbotId} // ✅ προσθήκη
-						onSelectBot={(id) => {
-							console.log(
-								"%c[App.jsx] 🎯 onSelectBot called",
-								"color:orange; font-weight:bold;"
-							);
-							console.log(
-								"Previous activeChatbotId:",
-								activeChatbotId
-							);
-							console.log(
-								"New selected bot ID from Dashboard:",
-								id
-							);
-
-							setActiveChatbotId(id);
-
-							console.log(
-								"%c[App.jsx] ✅ activeChatbotId updated via Dashboard click",
-								"color:green; font-weight:bold;",
-								id
-							);
-						}}
-					/>
-				</div>
-			)}
+			</div>
+		)}
 
 			{currentView === "form" && (
 				<>
