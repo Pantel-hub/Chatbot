@@ -38,8 +38,17 @@ export default function FaceCapture({ onCapture, onCancel, mode = 'register' }) 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
-        setIsCameraReady(true);
-        setError(null);
+        
+        // Wait for video to be ready and play
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play().then(() => {
+            setIsCameraReady(true);
+            setError(null);
+          }).catch(err => {
+            console.error('Video play error:', err);
+            setError('Failed to start video playback');
+          });
+        };
       }
     } catch (err) {
       console.error('Camera error:', err);
@@ -139,7 +148,9 @@ export default function FaceCapture({ onCapture, onCancel, mode = 'register' }) 
                       ref={videoRef}
                       autoPlay
                       playsInline
+                      muted
                       className="w-full h-full object-cover"
+                      style={{ transform: 'scaleX(-1)' }}
                     />
                     {!isCameraReady && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">

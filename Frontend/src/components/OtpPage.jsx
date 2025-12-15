@@ -154,22 +154,22 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 				</button>
 				<button
 					onClick={toggleLang}
-						className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center gap-1 text-sm"
-					>
-						<Globe className="h-4 w-4" />
-						{i18n.language === "el" ? "EN" : "EL"}
-					</button>
-					<h1 className="text-2xl font-bold text-white text-center">
-						{t("login.title", "Σύνδεση")}
-					</h1>
-					<p className="text-indigo-100 text-center mt-2">
-						{otpSent
-							? t(
-									"login.enterCode",
-									"Εισάγετε τον κωδικό που λάβατε"
-							  )
-							: t("login.welcomeBack", "Καλώς ήρθες!")}
-					</p>
+					className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center gap-1 text-sm"
+				>
+					<Globe className="h-4 w-4" />
+					{i18n.language === "el" ? "EN" : "EL"}
+				</button>
+				<h1 className="text-2xl font-bold text-white text-center px-16">
+					{t("login.title", "Σύνδεση")}
+				</h1>
+				<p className="text-indigo-100 text-center mt-2 px-16">
+					{otpSent
+						? t(
+								"login.enterCode",
+								"Εισάγετε τον κωδικό που λάβατε"
+						  )
+						: t("login.welcomeBack", "Καλώς ήρθες!")}
+				</p>
 				</div>
 
 				{/* Content */}

@@ -70,7 +70,7 @@ class PathBasedCORSMiddleware(BaseHTTPMiddleware):
             resp = Response(status_code=204)  # HTTP/1.1 204 No Content
             set_vary(resp)
 
-            if path.startswith("/api/cms"):
+            if path.startswith("/api/cms") or path.startswith("/api/face"):
                 # Επιτρέπουμε μόνο whitelisted origins + credentials
                 if origin in ALLOWED_CMS_ORIGINS:
                     resp.headers["Access-Control-Allow-Origin"] = origin
@@ -115,7 +115,7 @@ class PathBasedCORSMiddleware(BaseHTTPMiddleware):
 
         set_vary(response)
         # CORS για actual requests
-        if path.startswith("/api/cms"):
+        if path.startswith("/api/cms") or path.startswith("/api/face"):
             if origin in ALLOWED_CMS_ORIGINS:
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"

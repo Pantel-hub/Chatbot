@@ -106,55 +106,80 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 			setIsLoading(true);
 			
 			try {
-				// First, register user with traditional method to create account
-				const tempEmail = `face_${Date.now()}@temp.local`;
-				const registerRes = await fetch(API_ENDPOINTS.verifyOtp, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify({
-						contact: tempEmail,
-						method: "email",
-						otp_code: "000000", // Temp OTP, will need backend adjustment
-						first_name: firstName,
-						last_name: lastName,
-						skip_otp_verify: true, // Backend flag for face registration
-					}),
-				});
-				
-				if (!registerRes.ok) {
-					throw new Error("Failed to create account");
-				}
-				
-				// Then register face
-				const faceRes = await fetch(API_ENDPOINTS.registerFace, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify({ image: faceData }),
-				});
-				
-				if (!faceRes.ok) {
-					throw new Error("Failed to register face");
-				}
-				
-				onSuccess?.({
-					firstName,
-					lastName,
-					method: "face",
-				});
-				return;
-			} catch (err) {
-				setError(err.message);
-				setIsLoading(false);
-				return;
+			// First, register user with face authentication method
+			const tempEmail = `face_${Date.now()}@temp.local`;
+			
+			console.log("Registering user with face auth...");
+			const registerRes = await fetch(API_ENDPOINTS.verifyOtp, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({
+					contact: tempEmail,
+					method: "email",
+					otp_code: "000000",
+					first_name: firstName,
+					last_name: lastName,
+					skip_otp_verify: true,
+				}),
+			});
+			
+			console.log("Register response status:", registerRes.status);
+			
+			if (!registerRes.ok) {
+				const errorData = await registerRes.json().catch(() => ({}));
+				throw new Error(errorData.detail || "Failed to create account");
 			}
+			
+			const userData = await registerRes.json();
+			console.log("User created successfully:", userData);
+			
+			// Extract session ID from response
+			const authSessionId = userData.auth_session_id;
+			if (!authSessionId) {
+				throw new Error("No auth session ID returned");
+			}
+			
+			// Then register face with explicit authorization
+			console.log("Registering face embedding with session:", authSessionId);
+			const faceRes = await fetch(API_ENDPOINTS.registerFace, {
+				method: "POST",
+				headers: { 
+					"Content-Type": "application/json",
+					"Authorization": authSessionId,
+				},
+				credentials: "include",
+				body: JSON.stringify({ image: faceData }),
+			});
+			
+			console.log("Face register response status:", faceRes.status);
+			
+			if (!faceRes.ok) {
+				const errorData = await faceRes.json().catch(() => ({}));
+				throw new Error(errorData.detail || "Failed to register face");
+			}
+			
+			const faceData2 = await faceRes.json();
+			console.log("Face registered successfully:", faceData2);
+			
+			onSuccess?.({
+				firstName,
+				lastName,
+				method: "face",
+			});
+			return;
+		} catch (err) {
+			console.error("Face registration error:", err);
+			setError(err.message || "Failed to register. Please try again.");
+			setIsLoading(false);
+			return;
 		}
-		
-		// Traditional email/SMS flow
-		if (!otpSent) return setError(t("login.sendOtp", "Στείλε κωδικό OTP."));
-		if (!otp || otp.length !== 6)
-			return setError(t("login.enterOtp", "Συμπλήρωσε 6-ψήφιο OTP."));
+	}
+	
+	// Traditional email/SMS flow
+	if (!otpSent) return setError(t("login.sendOtp", "Στείλε κωδικό OTP."));
+	if (!otp || otp.length !== 6)
+		return setError(t("login.enterOtp", "Συμπλήρωσε 6-ψήφιο OTP."));
 
 		setIsLoading(true);
 

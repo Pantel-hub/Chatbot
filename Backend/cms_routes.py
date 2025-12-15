@@ -810,6 +810,8 @@ async def verify_otp(response: Response, request: VerifyOtpRequest):
             "message": "Ο χρήστης εγγράφηκε επιτυχώς",
             "contact": request.contact,
             "method": request.method,
+            "auth_session_id": auth_session_id,  # Return session ID for face registration
+            "user_id": user_id,
         }
 
     except HTTPException:
