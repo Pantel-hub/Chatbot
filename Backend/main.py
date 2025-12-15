@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse
 from calendar_helper import GoogleCalendarHelper
 from cms_routes import router as cms_router
 from widget_routes import router as widget_router
+from face_auth_routes import router as face_auth_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -148,6 +149,7 @@ def ready():
 # ---------------- Mount Routers ----------------
 app.include_router(cms_router, prefix="/api/cms", tags=["cms"])
 app.include_router(widget_router, prefix="/api/public", tags=["public"])
+app.include_router(face_auth_router, tags=["face-auth"])
 
 
 @app.get("/oauth2callback")
