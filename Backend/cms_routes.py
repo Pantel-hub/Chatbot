@@ -841,6 +841,69 @@ async def check_session(user_data: dict = Depends(get_current_user)):
     return {"status": "ok", "user_id": user_data["user_id"]}
 
 
+@router.get("/get-user")
+async def get_user_profile(user_data: dict = Depends(get_current_user)):
+    """
+    Returns current logged-in user profile details.
+    - If logged via face: Returns name, surname, and login_method='face' (email is temp like face_xxx@temp.local)
+    - If logged via email: Returns name, surname, email, phone, and login_method='email'
+    - If logged via phone: Returns name, surname, phone, and login_method='phone'
+    """
+    try:
+        user_id = user_data["user_id"]
+        async with get_db() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(
+                    """
+                    SELECT id, first_name, last_name, email, phone_number, preferred_otp_method
+                    FROM users
+                    WHERE id = %s
+                    """,
+                    (user_id,),
+                )
+                user = await cursor.fetchone()
+                
+                if not user:
+                    raise HTTPException(status_code=404, detail="User not found")
+                
+                # Determine login method based on what's registered
+                # Face: email starts with "face_" (temp email)
+                # Phone: no email but has phone_number
+                # Email: has email that doesn't start with "face_"
+                if user["email"] and user["email"].startswith("face_"):
+                    login_method = "face"
+                elif user["email"]:
+                    login_method = "email"
+                elif user["phone_number"]:
+                    login_method = "phone"
+                else:
+                    login_method = "email"  # fallback
+                
+                # Build response based on login method
+                response_data = {
+                    "user_id": user["id"],
+                    "first_name": user["first_name"],
+                    "last_name": user["last_name"],
+                    "login_method": login_method,
+                }
+                
+                # Include contact info based on login method
+                if login_method == "email":
+                    response_data["email"] = user["email"]
+                    response_data["phone"] = user["phone_number"]
+                elif login_method == "phone":
+                    response_data["phone"] = user["phone_number"]
+                # For face login, don't include email/phone since they're not the login method
+                
+                return response_data
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching user profile: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch user profile")
+
+
 ###chat###
 @router.post("/chat")
 async def chat_with_company(
@@ -1326,9 +1389,23 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
     Επιστρέφει όλα τα chatbots του συνδεδεμένου χρήστη
     """
     user_id = user_data["user_id"]
+    print(f"📊 [GET /user-chatbots] user_id from session: {user_id}")
+    print(f"📊 [GET /user-chatbots] full user_data: {user_data}")
+    logger.info(f"📊 [GET /user-chatbots] user_id from session: {user_id}, email: {user_data.get('email')}")
 
     try:
         async with get_db() as conn:
+            # First, let's verify the session exists
+            async with conn.cursor() as cursor:
+                await cursor.execute(
+                    "SELECT * FROM auth_sessions WHERE auth_session_id = %s",
+                    (user_data.get('auth_session_id'),)
+                )
+                session_rec = await cursor.fetchone()
+                print(f"📍 [GET /user-chatbots] Session record: {dict(session_rec) if session_rec else 'NOT FOUND'}")
+                logger.info(f"📍 [GET /user-chatbots] Session record verified: {dict(session_rec) if session_rec else 'NOT FOUND'}")
+            
+            # Now fetch chatbots
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     """
@@ -1342,11 +1419,25 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
                     (user_id,),
                 )
                 chatbots = await cursor.fetchall()
+                print(f"🤖 [GET /user-chatbots] Query result: {len(chatbots)} chatbots found for user_id={user_id}")
+                logger.info(f"🤖 [GET /user-chatbots] Query result: {len(chatbots)} chatbots found for user_id={user_id}")
+                
+                # Debug: let's check what's in user_chatbots table for this user
+                await cursor.execute(
+                    "SELECT * FROM user_chatbots WHERE user_id = %s",
+                    (user_id,)
+                )
+                user_chatbots_records = await cursor.fetchall()
+                print(f"🔗 [GET /user-chatbots] user_chatbots table entries: {len(user_chatbots_records)}")
+                for record in user_chatbots_records:
+                    print(f"   → {dict(record)}")
+                logger.info(f"🔗 [GET /user-chatbots] user_chatbots table has {len(user_chatbots_records)} entries for user_id={user_id}")
 
         return {"chatbots": [dict(bot) for bot in chatbots]}
 
     except Exception as e:
         logger.error(f"Error fetching user chatbots: {e}")
+        print(f"❌ [GET /user-chatbots] Error: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch chatbots")
 
 

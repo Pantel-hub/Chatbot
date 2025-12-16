@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
 	sendLoginOtp: `${BASE_URL}/api/cms/send-login-otp`,
 	verifyLoginOtp: `${BASE_URL}/api/cms/verify-login-otp`,
 	logout: `${BASE_URL}/api/cms/logout`,
+	getUserProfile: `${BASE_URL}/api/cms/get-user`,
 	analytics: `${BASE_URL}/api/cms/analytics/company`,
 	getUserChatbots: `${BASE_URL}/api/cms/user-chatbots`,
 	getChatbot: (chatbotId) => `${BASE_URL}/api/cms/chatbot/${chatbotId}`,

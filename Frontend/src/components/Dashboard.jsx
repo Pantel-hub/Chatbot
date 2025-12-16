@@ -30,6 +30,7 @@ import {
 } from "recharts";
 
 import Analytics from "./Analytics";
+import ProfileButton from "./ProfileButton";
 import { API_ENDPOINTS } from "../config/api";
 
 function Card({ children, className = "" }) {
@@ -85,9 +86,20 @@ export default function Dashboard({
 
 	const fetchUserBots = async () => {
 		try {
-			const res = await fetch(API_ENDPOINTS.getUserChatbots, {
+			let res = await fetch(API_ENDPOINTS.getUserChatbots, {
 				credentials: "include",
 			});
+
+			// Handle 401: retry after a brief delay (cookie might not be processed yet)
+			if (res.status === 401) {
+				console.warn(
+					"[Dashboard] 🔄 Got 401, retrying after delay (cookie might not be set yet)..."
+				);
+				await new Promise((resolve) => setTimeout(resolve, 500));
+				res = await fetch(API_ENDPOINTS.getUserChatbots, {
+					credentials: "include",
+				});
+			}
 
 			if (!res.ok) {
 				throw new Error(`HTTP error! status: ${res.status}`);
@@ -233,14 +245,7 @@ export default function Dashboard({
 									</span>
 								</button>
 
-								<button
-									onClick={onLogout}
-									className="p-1.5 sm:p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center gap-1"
-									aria-label="Logout"
-									title="Logout"
-								>
-									<LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
-								</button>
+								<ProfileButton onLogout={onLogout} />
 							</div>
 						</div>
 					</div>

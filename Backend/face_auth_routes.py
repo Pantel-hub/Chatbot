@@ -3,7 +3,7 @@ Face Authentication Routes (FastAPI)
 Handles face registration and login endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Header, Cookie
+from fastapi import APIRouter, HTTPException, Depends, Header, Cookie, Response
 from pydantic import BaseModel
 from typing import Optional
 import logging
@@ -114,7 +114,7 @@ async def register_face_endpoint(
 
 
 @router.post("/login", response_model=FaceLoginResponse)
-async def face_login_endpoint(request: FaceImageRequest):
+async def face_login_endpoint(response: Response, request: FaceImageRequest):
     """
     Login using face recognition
 
@@ -126,6 +126,8 @@ async def face_login_endpoint(request: FaceImageRequest):
     try:
         # Find matching user
         user_id = await find_matching_user(request.image)
+        print(f"🔍 [Face Login] Face matched to user_id: {user_id}")
+        logger.info(f"🔍 [Face Login] Face matched to user_id: {user_id}")
 
         if not user_id:
             logger.warning("Face login failed: No matching user found")
@@ -140,6 +142,8 @@ async def face_login_endpoint(request: FaceImageRequest):
                     (user_id,),
                 )
                 user = await cursor.fetchone()
+                print(f"👤 [Face Login] User data from DB: {dict(user) if user else 'NOT FOUND'}")
+                logger.info(f"👤 [Face Login] User data from DB: {dict(user) if user else 'NOT FOUND'}")
 
                 if not user:
                     raise HTTPException(status_code=404, detail="User not found")
@@ -153,6 +157,8 @@ async def face_login_endpoint(request: FaceImageRequest):
                 # Create authentication session
                 auth_session_id = str(uuid.uuid4())
                 expires_at = datetime.now() + timedelta(days=30)
+                print(f"🔐 [Face Login] Creating session: auth_session_id={auth_session_id}, user_id={user_id}, expires_at={expires_at}")
+                logger.info(f"🔐 [Face Login] Creating session: auth_session_id={auth_session_id}, user_id={user_id}, expires_at={expires_at}")
 
                 await cursor.execute(
                     """INSERT INTO auth_sessions (auth_session_id, user_id, expires_at)
@@ -161,8 +167,29 @@ async def face_login_endpoint(request: FaceImageRequest):
                 )
 
             await conn.commit()
+            # Verify session was created
+            async with conn.cursor() as cursor:
+                await cursor.execute(
+                    "SELECT * FROM auth_sessions WHERE auth_session_id = %s",
+                    (auth_session_id,)
+                )
+                session_check = await cursor.fetchone()
+                print(f"✅ [Face Login] Session verified in DB: {dict(session_check) if session_check else 'NOT FOUND'}")
+                logger.info(f"✅ [Face Login] Session verified in DB: {dict(session_check) if session_check else 'NOT FOUND'}")
 
-        logger.info(f"Face login successful for user {user_id}")
+        # Set cookie for session
+        response.set_cookie(
+            key="auth_session_id",
+            value=auth_session_id,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=2592000,  # 30 days
+            path="/",
+        )
+        print(f"🍪 [Face Login] Cookie set: auth_session_id={auth_session_id}")
+        logger.info(f"🍪 [Face Login] Cookie set: auth_session_id={auth_session_id}")
+        logger.info(f"✨ Face login successful for user {user_id}")
 
         return {
             "success": True,

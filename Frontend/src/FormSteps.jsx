@@ -14,6 +14,7 @@ import Design from "./components/Design.jsx";
 import Capabilities from "./components/Capabilities.jsx";
 import Test from "./components/Test.jsx";
 import Deploy from "./components/Deploy.jsx";
+import ProfileButton from "./components/ProfileButton.jsx";
 
 import GreekFlag from "./assets/greekflag.jpg";
 import UkFlag from "./assets/ukflag.jpg";
@@ -26,6 +27,7 @@ export default function FormSteps({
 	onPrev,
 	onFormSubmit,
 	onGoToDashboard,
+	onLogout,
 	apiKey,
 	widgetScript,
 	inheritedFormData,
@@ -474,8 +476,8 @@ export default function FormSteps({
 		<>
 			{/* Header (flags + title + mobile stepper) */}
 			<div className="mb-6 sm:mb-8">
-				{/* γλώσσες */}
-				<div className="flex justify-end gap-2 sm:gap-3 mb-3 sm:mb-4">
+				{/* Language selector + Profile button */}
+				<div className="flex justify-end gap-2 sm:gap-3 mb-3 sm:mb-4 items-center">
 					<img
 						src={UkFlag}
 						alt={t("formSteps.altEnglish", "English")}
@@ -496,6 +498,7 @@ export default function FormSteps({
 						}`}
 						onClick={() => changeLang("el")}
 					/>
+					<ProfileButton onLogout={onLogout || onGoToDashboard} />
 				</div>
 
 				{/* Τίτλος τρέχοντος βήματος – με αριθμό μπροστά (π.χ. "5. Εμφάνιση & Branding") */}

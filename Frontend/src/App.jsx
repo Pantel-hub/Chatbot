@@ -540,6 +540,7 @@ export default function App() {
 													onGoToDashboard={
 														handleGoToDashboard
 													}
+													onLogout={handleLogout}
 													apiKey={apiKey}
 													widgetScript={widgetScript}
 													inheritedFormData={formData}

@@ -90,7 +90,7 @@ class FaceRecognitionService:
             )
 
             if not embedding_objs or len(embedding_objs) == 0:
-                raise ValueError("No face detected in the image")
+                raise ValueError("Could not detect a face, try again please")
 
             # Get first face (primary face in image)
             embedding_obj = embedding_objs[0]
@@ -108,15 +108,23 @@ class FaceRecognitionService:
             return embedding, face_info
 
         except ValueError as e:
-            logger.error(f"Face detection error: {e}")
+            # Re-raise ValueError (includes our user-friendly message)
+            logger.warning(f"Face detection error: {e}")
             raise
         except Exception as e:
-            logger.error(f"Error extracting face embedding: {e}")
-            raise ValueError(f"Failed to process face: {str(e)}")
+            error_msg = str(e)
+            # Check if it's a numpy array or face detection error
+            if "numpy array" in error_msg.lower() or "face" in error_msg.lower():
+                logger.warning(f"Face detection failed: {e}")
+                raise ValueError("Could not detect your face, please try again")
+            else:
+                logger.error(f"Error extracting face embedding: {e}")
+                raise ValueError("Could not detect a face, try again please")
 
     async def register_face(self, user_id: int, image_data: str) -> bool:
         """
-        Register a user's face by storing their embedding
+        Register a user's face by storing their embedding.
+        Prevents duplicate face registrations (same face for multiple users).
 
         Args:
             user_id: User ID from users table
@@ -124,10 +132,26 @@ class FaceRecognitionService:
 
         Returns:
             True if registration successful
+            
+        Raises:
+            ValueError: If the face is already registered to a different user
         """
         try:
             # Extract face embedding
             embedding, face_info = self.extract_face_embedding(image_data)
+
+            # Check if this face already exists for a DIFFERENT user
+            duplicate_user = await self._find_existing_face(embedding, user_id)
+            if duplicate_user is not None:
+                error_msg = (
+                    f"This face is already registered to another account. "
+                    f"Please login to your existing account instead of creating a new one."
+                )
+                logger.warning(
+                    f"Attempted duplicate face registration for user {user_id}, "
+                    f"face already belongs to user {duplicate_user}"
+                )
+                raise ValueError(error_msg)
 
             # Serialize embedding to binary
             embedding_binary = pickle.dumps(embedding)
@@ -166,6 +190,56 @@ class FaceRecognitionService:
         except Exception as e:
             logger.error(f"Error registering face for user {user_id}: {e}")
             raise
+
+    async def _find_existing_face(
+        self, new_embedding: np.ndarray, current_user_id: int
+    ) -> Optional[int]:
+        """
+        Check if a face already exists in the database for a different user
+
+        Args:
+            new_embedding: The face embedding to check
+            current_user_id: The user ID registering the face (to exclude)
+
+        Returns:
+            User ID if face found for different user, None otherwise
+        """
+        try:
+            # Get all stored embeddings
+            async with get_db() as conn:
+                async with conn.cursor() as cursor:
+                    await cursor.execute(
+                        "SELECT user_id, embedding FROM face_embeddings WHERE user_id != %s",
+                        (current_user_id,),
+                    )
+                    results = await cursor.fetchall()
+
+            if not results:
+                return None
+
+            # Compare against all OTHER stored embeddings
+            for row in results:
+                user_id = row["user_id"]
+                stored_embedding = pickle.loads(row["embedding"])
+
+                distance = self._calculate_distance(new_embedding, stored_embedding)
+
+                # If match found within threshold, this face already exists
+                if distance <= VERIFICATION_THRESHOLD:
+                    logger.warning(
+                        f"Duplicate face detected: user {user_id} already has this face "
+                        f"(distance: {distance:.4f})"
+                    )
+                    return user_id
+
+            return None
+
+        except Exception as e:
+            logger.error(f"Error checking for duplicate faces: {e}")
+            # Don't raise here - let registration continue
+            # If duplicate check fails, let the system continue rather than blocking
+            return None
+
 
     async def verify_face(self, user_id: int, image_data: str) -> Tuple[bool, float]:
         """
@@ -227,6 +301,7 @@ class FaceRecognitionService:
         try:
             # Extract embedding from provided image
             current_embedding, _ = self.extract_face_embedding(image_data)
+            print(f"🎯 [find_matching_user] Extracted embedding from image")
 
             # Get all stored embeddings
             async with get_db() as conn:
@@ -236,6 +311,7 @@ class FaceRecognitionService:
                     )
                     results = await cursor.fetchall()
 
+            print(f"🎯 [find_matching_user] Found {len(results)} stored face embeddings in DB")
             if not results:
                 logger.info("No face embeddings in database")
                 return None
@@ -249,6 +325,7 @@ class FaceRecognitionService:
                 stored_embedding = pickle.loads(row["embedding"])
 
                 distance = self._calculate_distance(current_embedding, stored_embedding)
+                print(f"   → user_id={user_id}: distance={distance:.4f}")
 
                 if distance < best_match_distance:
                     best_match_distance = distance
@@ -256,11 +333,13 @@ class FaceRecognitionService:
 
             # Check if best match is within threshold
             if best_match_distance <= VERIFICATION_THRESHOLD:
+                print(f"✅ [find_matching_user] MATCH FOUND: user_id={best_match_user}, distance={best_match_distance:.4f}")
                 logger.info(
                     f"Found matching user {best_match_user} with distance {best_match_distance:.4f}"
                 )
                 return best_match_user
             else:
+                print(f"❌ [find_matching_user] NO MATCH: Best distance {best_match_distance:.4f} exceeds threshold {VERIFICATION_THRESHOLD}")
                 logger.info(
                     f"No matching user found. Best distance: {best_match_distance:.4f}"
                 )
@@ -268,6 +347,7 @@ class FaceRecognitionService:
 
         except Exception as e:
             logger.error(f"Error finding matching user: {e}")
+            print(f"❌ [find_matching_user] Error: {e}")
             raise
 
     def _calculate_distance(

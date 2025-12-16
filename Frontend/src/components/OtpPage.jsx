@@ -86,6 +86,9 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 			}
 
 			// Επιτυχής σύνδεση με face
+			// Add a small delay to ensure cookie is processed by browser
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			
 			if (typeof onSubmit === "function") onSubmit();
 		} catch (err) {
 			setError(err.message);

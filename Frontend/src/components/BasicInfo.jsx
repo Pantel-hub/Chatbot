@@ -209,7 +209,7 @@ export default function BasicInfo({
 	);
 
 	const baseInputClasses =
-		"w-full p-3 pl-9 sm:pl-10 border rounded-xl transition duration-200 bg-slate-50 focus:bg-white focus:outline-none text-base sm:text-sm disabled:opacity-60 disabled:cursor-not-allowed";
+		"w-full p-3 pl-10 sm:pl-10 border rounded-xl transition duration-200 bg-slate-50 focus:bg-white focus:outline-none text-base sm:text-sm disabled:opacity-60 disabled:cursor-not-allowed";
 	const normalClasses =
 		"border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500";
 	const errorClasses =
