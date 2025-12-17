@@ -364,7 +364,7 @@
     "brand": "Grimbot",
     "nav": {
       "features": "Features",
-      "pricing": "Pricing",
+      "signIn": "Sign In",
       "contact": "Contact"
     },
     "cta": {
@@ -379,17 +379,38 @@
       "subtitle": "Train it with your company's data and easily embed it on your website."
     },
     "features": {
-      "cleanDesign": {
-        "title": "Clean Design",
-        "desc": "Modern typography and balanced layout."
+      "title": "Powerful Features",
+      "aiChatbot": {
+        "title": "AI-Powered Chatbot",
+        "desc": "Create intelligent chatbots without coding using GPT-4."
       },
-      "secureFast": {
-        "title": "Secure & Fast",
-        "desc": "Best practices and lightweight assets."
+      "websiteKnowledge": {
+        "title": "Website Knowledge Base",
+        "desc": "Automatically scrape and index your company website for instant AI knowledge."
       },
-      "easyLaunch": {
-        "title": "Easy to Launch",
-        "desc": "Copy, paste, customize in seconds."
+      "multiLanguage": {
+        "title": "Multi-Language Support",
+        "desc": "Support customers in Greek, English, and many other languages."
+      },
+      "easyDeployment": {
+        "title": "Easy Widget Deployment",
+        "desc": "Deploy chatbot to your website with just a few lines of code."
+      },
+      "faceAuth": {
+        "title": "Face Recognition Login",
+        "desc": "Secure account access using biometric face recognition technology."
+      },
+      "leadCapture": {
+        "title": "Lead Capture Forms",
+        "desc": "Collect customer information and convert conversations into qualified leads."
+      },
+      "appointments": {
+        "title": "Appointment Scheduling",
+        "desc": "Allow customers to book appointments directly through the chatbot."
+      },
+      "realTime": {
+        "title": "Real-Time Conversations",
+        "desc": "Instant responses and live chat with your customers 24/7."
       }
     },
     "footer": {

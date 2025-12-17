@@ -161,6 +161,22 @@ export default function SidebarPreview({
 					</svg>
 				</a>
 			</div>
+
+			{/* Powered by Conferience.com */}
+			<div className="mt-4 pt-4 border-t border-slate-200">
+				<p className="text-xs text-center">
+					<span className="text-[#5B8BB8]">Powered by </span>
+					<a 
+						href="https://conferience.com/" 
+						target="_blank" 
+						rel="noopener noreferrer"
+						className="text-[#5B8BB8] hover:text-indigo-700 hover:underline transition-colors"
+					>
+						Conferience.com
+					</a>
+					<span className="text-[#5B8BB8]"> © 🐿️</span>
+				</p>
+			</div>
 		</aside>
 	);
 }

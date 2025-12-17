@@ -1,17 +1,19 @@
 // src/components/LandingPage.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Rocket, Shield, Sparkles, ArrowRight, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import chatbotLandingSvg from "../assets/chatbot_landing.svg";
 import chatbotLogo from "../assets/chatbot_logo.svg";
+import FeaturesPage from "./FeaturesPage";
 
 export default function LandingPage({
 	onStart,
 	onSignIn,
-	onPricing,
 	onContact,
+	onFeatures,
 }) {
 	const { t, i18n } = useTranslation();
+	const [showFeatures, setShowFeatures] = useState(false);
 
 	// 🔘 Inline κουμπί αλλαγής γλώσσας (χωρίς ξεχωριστό component)
 	const isGreek = i18n.language?.startsWith("el");
@@ -40,16 +42,12 @@ export default function LandingPage({
 								{t("landing.brand", "Grimbot")}
 							</span>
 						</div>
-						{/* Desktop Nav */}
 						<nav className="hidden md:flex items-center gap-4 lg:gap-6 text-sm">
-							<button className="hover:text-indigo-600 transition-colors">
-								{t("landing.nav.features", "Features")}
-							</button>
-							<button
+							<button 
 								className="hover:text-indigo-600 transition-colors"
-								onClick={onPricing}
+								onClick={() => setShowFeatures(true)}
 							>
-								{t("landing.nav.pricing", "Pricing")}
+								{t("landing.nav.features", "Features")}
 							</button>
 							<button
 								className="hover:text-indigo-600 transition-colors"
@@ -58,8 +56,6 @@ export default function LandingPage({
 								{t("landing.nav.contact", "Contact")}
 							</button>
 						</nav>
-
-						{/* Actions */}
 						<div className="flex items-center gap-1 sm:gap-2">
 							{/* Κουμπί αλλαγής γλώσσας μέσα στον ίδιο κώδικα */}
 							<button
@@ -106,62 +102,59 @@ export default function LandingPage({
 
 					{/* Mobile Nav */}
 					<nav className="md:hidden border-t border-gray-200 py-2 flex items-center justify-center gap-4 text-xs">
-						<button className="hover:text-indigo-600 transition-colors py-1">
+						<button 
+							className="hover:text-indigo-600 transition-colors py-1"
+							onClick={() => setShowFeatures(true)}
+						>
 							{t("landing.nav.features", "Features")}
 						</button>
 						<button
 							className="hover:text-indigo-600 transition-colors py-1"
-							onClick={onPricing}
-						>
-							{t("landing.nav.pricing", "Pricing")}
-						</button>
-						<button
-							className="hover:text-indigo-600 transition-colors py-1"
-							onClick={onContact}
-						>
-							{t("landing.nav.contact", "Contact")}
-						</button>
-					</nav>
+						onClick={onContact}
+					>
+						{t("landing.nav.contact", "Contact")}
+					</button>
+				</nav>
+			</div>
+		</header>
+
+		{/* Main */}
+		<main className="flex-1 overflow-y-auto overflow-x-hidden w-full">
+			<section className="relative min-h-[calc(100vh-64px)] w-full">
+				{/* Soft blobs */}
+				<div className="pointer-events-none absolute inset-0 overflow-hidden">
+					<div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-purple-200/40 blur-3xl" />
+					<div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-indigo-200/40 blur-3xl" />
 				</div>
-			</header>
 
-			{/* Main */}
-			<main className="flex-1 overflow-y-auto overflow-x-hidden w-full">
-				<section className="relative min-h-[calc(100vh-64px)] w-full">
-					{/* Soft blobs */}
-					<div className="pointer-events-none absolute inset-0 overflow-hidden">
-						<div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-purple-200/40 blur-3xl" />
-						<div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-indigo-200/40 blur-3xl" />
-					</div>
+				<div className="relative w-full">
+					<div className="mx-auto max-w-6xl px-3 sm:px-4 py-8 sm:py-12 lg:py-16 w-full">
+						<div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center w-full">
+							<div className="max-w-3xl">
+								<div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium text-indigo-700">
+									{t(
+										"landing.badge",
+										"New: Faster onboarding"
+									)}
+								</div>
 
-					<div className="relative w-full">
-						<div className="mx-auto max-w-6xl px-3 sm:px-4 py-8 sm:py-12 lg:py-16 w-full">
-							<div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center w-full">
-								<div className="max-w-3xl">
-									<div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium text-indigo-700">
-										{t(
-											"landing.badge",
-											"New: Faster onboarding"
-										)}
-									</div>
+								<h1 className="mt-3 sm:mt-4 text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+									{t(
+										"landing.hero.title",
+										"Build delightful experiences in minutes."
+									)}
+								</h1>
 
-									<h1 className="mt-3 sm:mt-4 text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-										{t(
-											"landing.hero.title",
-											"Build delightful experiences in minutes."
-										)}
-									</h1>
+								<p className="mt-3 sm:mt-4 text-sm sm:text-lg md:text-xl text-gray-600">
+									{t(
+										"landing.hero.subtitle",
+										"Launch a polished product site with a clean design, responsive layout, and zero fuss."
+									)}
+								</p>
 
-									<p className="mt-3 sm:mt-4 text-sm sm:text-lg md:text-xl text-gray-600">
-										{t(
-											"landing.hero.subtitle",
-											"Launch a polished product site with a clean design, responsive layout, and zero fuss."
-										)}
-									</p>
-
-									<div className="mt-6 sm:mt-8">
-										<button
-											onClick={onStart}
+								<div className="mt-6 sm:mt-8">
+									<button
+										onClick={onStart}
 											className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 font-medium text-sm sm:text-base transition-all shadow-lg hover:shadow-xl"
 											aria-label={t(
 												"landing.cta.startFree",
@@ -248,31 +241,43 @@ export default function LandingPage({
 									</div>
 								</div>
 
-								{/* SVG Image */}
-								<div className="hidden lg:flex items-center justify-center">
-									<img
-										src={chatbotLandingSvg}
-										alt="Chatbot Landing"
-										className="w-full max-w-md animate-fade-in"
-									/>
-								</div>
+
+							{/* Right column - SVG Image */}
+							<div className="hidden lg:flex items-center justify-center">
+								<img
+									src={chatbotLandingSvg}
+									alt="Chatbot Landing"
+									className="w-full max-w-md animate-fade-in"
+								/>
 							</div>
 						</div>
 					</div>
-				</section>
-			</main>
+				</div>
+			</section>
+		</main>
 
-			{/* Footer */}
-			<footer className="shrink-0 border-t border-gray-200 bg-white mt-auto">
+		{/* Footer */}
+		<footer className="shrink-0 border-t border-gray-200 bg-white mt-auto">
 				<div className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6">
 					<div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-						<p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
-							© {new Date().getFullYear()}{" "}
-							{t("landing.brand", "Grimbot")}.{" "}
-							{t(
-								"landing.footer.allRights",
-								"All rights reserved."
-							)}
+						<p className="text-xs sm:text-sm text-center sm:text-left">
+							<span className="text-[#5B8BB8]">Powered by </span>
+							<a 
+								href="https://conferience.com/" 
+								target="_blank" 
+								rel="noopener noreferrer"
+								className="text-[#5B8BB8] hover:text-indigo-700 hover:underline transition-colors"
+							>
+								Conferience.com
+							</a>
+							<span className="text-[#5B8BB8]"> © 🐿️</span>
+							<span className="text-gray-400 mx-2">|</span>
+							<button
+								onClick={onContact}
+								className="text-[#5B8BB8] hover:text-indigo-700 hover:underline transition-colors"
+							>
+								contact us
+							</button>
 						</p>
 						<div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
 							<button className="text-gray-600 hover:text-indigo-600 transition-colors">
@@ -288,6 +293,9 @@ export default function LandingPage({
 					</div>
 				</div>
 			</footer>
+
+			{/* Features Modal */}
+			{showFeatures && <FeaturesPage onClose={() => setShowFeatures(false)} />}
 		</div>
 	);
 }

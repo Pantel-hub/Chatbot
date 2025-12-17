@@ -1498,7 +1498,7 @@ async def update_chatbot(
                 raise HTTPException(status_code=403, detail="Access denied")
 
             await cursor.execute(
-                "SELECT website_data , api_key FROM companies WHERE id=%s",
+                "SELECT website_data, websiteURL, api_key FROM companies WHERE id=%s",
                 (chatbot_id,),
             )
             row = await cursor.fetchone()
@@ -1508,6 +1508,7 @@ async def update_chatbot(
                 )
 
             stored_website_data = row["website_data"] or ""
+            stored_website_url = row["websiteURL"] or ""
             existing_api_key = row["api_key"]
 
     # 2) Parse input
@@ -1549,6 +1550,15 @@ async def update_chatbot(
     if botAvatar:
         content = await botAvatar.read()
         avatar_data = f"data:{botAvatar.content_type};base64,{base64.b64encode(content).decode('utf-8')}"
+
+    # 6) Auto-detect if website URL changed
+    new_website_url = str(data.get("websiteURL") or "").strip()
+    url_changed = new_website_url != stored_website_url
+    
+    # If URL changed and there's a new URL, automatically trigger rescrape
+    if url_changed and new_website_url and not rescrape:
+        logger.info(f"🔄 Website URL changed from '{stored_website_url}' to '{new_website_url}' - auto-triggering rescrape")
+        rescrape = True
 
     # 7) Website Data - 3 options
     if rescrape:
