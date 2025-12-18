@@ -38,7 +38,12 @@ def get_website_source_code(url, headless=True):
         response = session.get(url, headers=headers, timeout=30)
         response.raise_for_status()
 
-        # Return the HTML content
+        # Ensure proper encoding is set before accessing .text
+        # This handles cases where the server doesn't specify encoding correctly
+        if response.encoding is None or response.encoding == 'ISO-8859-1':
+            response.encoding = response.apparent_encoding
+        
+        # Return the HTML content - .text handles decompression and decoding
         return response.text
 
     except requests.exceptions.RequestException as e:

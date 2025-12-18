@@ -260,15 +260,8 @@ and close with: "Would you like me to continue with more details?"
         # Δημιούργησε το σωστό prompt ανάλογα με mode
         appointment_prompt = get_appointment_prompt_template(mode, booking_page_url)
 
-    print("=== PROMPT INPUT DEBUG ===")
-    print("coreFeatures:", coreFeatures)
-    print("leadCaptureFields(raw):", leadCaptureFields)
-
     leadCaptureFields = leadCaptureFields or {}
     active_fields = [f for f, enabled in leadCaptureFields.items() if enabled]
-
-    print("leadCaptureFields(normalized):", leadCaptureFields)
-    print("active_fields:", active_fields)
 
     lead_capture_prompt = ""
     if coreFeatures and coreFeatures.get("leadCapture"):
@@ -288,14 +281,5 @@ and close with: "Would you like me to continue with more details?"
         full_prompt += lead_capture_prompt
     if appointment_prompt:
         full_prompt += appointment_prompt
-
-    # Στο create_system_prompt.py, πριν το return:
-    print("=== SYSTEM PROMPT DEBUG ===")
-    if coreFeatures and coreFeatures.get("appointmentScheduling"):
-        print("✅ Appointment feature is enabled")
-        print("✅ Appointment prompt added")
-    else:
-        print("❌ Appointment feature is disabled")
-    print("=== END DEBUG ===")
 
     return full_prompt

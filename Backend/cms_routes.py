@@ -1422,7 +1422,6 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
                 print(f"🤖 [GET /user-chatbots] Query result: {len(chatbots)} chatbots found for user_id={user_id}")
                 logger.info(f"🤖 [GET /user-chatbots] Query result: {len(chatbots)} chatbots found for user_id={user_id}")
                 
-                # Debug: let's check what's in user_chatbots table for this user
                 await cursor.execute(
                     "SELECT * FROM user_chatbots WHERE user_id = %s",
                     (user_id,)
@@ -1582,6 +1581,15 @@ async def update_chatbot(
                 main_page_data = scraped_data.get("main_page", {})
                 main_url = main_page_data.get("url")
 
+                # Check if main page scraping failed
+                if main_page_data.get("status") != "success":
+                    error_msg = main_page_data.get("error", "Unknown error")
+                    logger.error(f"❌ Main page scraping failed for {main_url}: {error_msg}")
+                    raise HTTPException(
+                        status_code=500, 
+                        detail=f"Failed to scrape website: {error_msg}"
+                    )
+
                 # 1) Κύρια σελίδα (main_page)
                 if main_page_data.get("status") == "success" and main_page_data.get(
                     "plain_text"
@@ -1621,6 +1629,14 @@ async def update_chatbot(
                 logger.info(
                     f"✅ Re-scraped structured website data length: {len(website_data_to_save)} characters"
                 )
+                
+                # Validate that we actually got website content
+                if len(website_data_to_save.strip()) < 100:
+                    logger.error(f"❌ Scraping produced insufficient content ({len(website_data_to_save)} chars)")
+                    raise HTTPException(
+                        status_code=500, 
+                        detail="Failed to extract meaningful content from website. Please check if the website is accessible and contains text content."
+                    )
 
             except Exception as e:
                 logger.error(f"❌ Re-scraping failed: {e}")
@@ -1859,13 +1875,6 @@ async def update_chatbot(
         try:
             async with conn.cursor() as cursor:
                 logger.info(f"Executing UPDATE for chatbot_id={chatbot_id}")
-
-                # Test row existence
-                await cursor.execute(
-                    "SELECT id FROM companies WHERE id=%s", (chatbot_id,)
-                )
-                test_row = await cursor.fetchone()
-                logger.info(f"Row existence test: {test_row}")
 
                 # Execute UPDATE
                 await cursor.execute(update_sql, tuple(params))

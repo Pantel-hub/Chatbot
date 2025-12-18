@@ -36,6 +36,7 @@ google-auth-oauthlib==1.2.2
 beautifulsoup4==4.12.3
 brightdata-sdk
 aiohttp==3.12.15
+brotli==1.1.0  # For Brotli decompression support in requests
 
 # File Processing
 unstructured==0.18.14

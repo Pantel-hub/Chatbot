@@ -116,8 +116,12 @@ def clean_html_for_content(
                         ]
                         for decl in style_declarations:
                             if ":" in decl:
-                                prop, val = decl.split(":", 1)
-                                current_styles[prop.strip().lower()] = val.strip()
+                                parts = decl.split(":", 1)
+                                # Safety check: ensure we got exactly 2 parts and both are non-empty
+                                if len(parts) == 2 and parts[0].strip() and parts[1].strip():
+                                    prop, val = parts
+                                    current_styles[prop.strip().lower()] = val.strip()
+                                # Skip malformed CSS declarations silently
                     except ValueError:
                         attrs_to_delete.append(attr_name)
                         continue

@@ -10,6 +10,9 @@ import time
 from bs4 import BeautifulSoup
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ScrapingController:
@@ -187,7 +190,10 @@ class ScrapingController:
                 page_data["error"] = "Failed to clean HTML"
 
         except Exception as e:
+            import traceback
             page_data["error"] = str(e)
+            logger.error(f"❌ Error scraping {url}: {str(e)}")
+            logger.error(f"📍 Full traceback:\n{traceback.format_exc()}")
 
         return page_data
 
@@ -195,30 +201,3 @@ class ScrapingController:
     async def _scrape_single_page_async(self, url: str) -> Dict[str, Any]:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(self.executor, self._scrape_single_page, url)
-
-    def test_scraper(self, test_url: str = "https://example.com"):
-        print(f"Testing ScrapingController with URL: {test_url}")
-        print("=" * 50)
-
-        try:
-            start_time = time.time()
-            result = self.scrape_website(test_url)
-            end_time = time.time()
-
-            print(f"Scraping completed in {end_time - start_time:.2f} seconds")
-            print(f"Main page status: {result['main_page'].get('status', 'unknown')}")
-            print(f"Total links found: {result['summary']['total_links_found']}")
-            print(
-                f"Successfully scraped links: {result['summary']['successfully_scraped']}"
-            )
-            print(f"Failed links: {result['summary']['failed']}")
-
-            if result["main_page"].get("clean_content"):
-                content_preview = result["main_page"]["clean_content"][:200]
-                print(f"\nMain page content preview:\n{content_preview}...")
-
-            return result
-
-        except Exception as e:
-            print(f"Test failed with error: {e}")
-            return None
