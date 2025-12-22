@@ -4,6 +4,7 @@ import { Rocket, Shield, Sparkles, ArrowRight, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import chatbotLandingSvg from "../assets/chatbot_landing.svg";
 import chatbotLogo from "../assets/chatbot_logo.svg";
+import conferenceLogo from "../assets/conferience_logo.png";
 import FeaturesPage from "./FeaturesPage";
 
 export default function LandingPage({
@@ -258,41 +259,36 @@ export default function LandingPage({
 
 		{/* Footer */}
 		<footer className="shrink-0 border-t border-gray-200 bg-white mt-auto">
-				<div className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6">
-					<div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-						<p className="text-xs sm:text-sm text-center sm:text-left">
-							<span className="text-[#5B8BB8]">Powered by </span>
-							<a 
-								href="https://conferience.com/" 
-								target="_blank" 
-								rel="noopener noreferrer"
-								className="text-[#5B8BB8] hover:text-indigo-700 hover:underline transition-colors"
-							>
-								Conferience.com
-							</a>
-							<span className="text-[#5B8BB8]"> © 🐿️</span>
-							<span className="text-gray-400 mx-2">|</span>
-							<button
-								onClick={onContact}
-								className="text-[#5B8BB8] hover:text-indigo-700 hover:underline transition-colors"
-							>
-								contact us
-							</button>
-						</p>
-						<div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
-							<button className="text-gray-600 hover:text-indigo-600 transition-colors">
-								{t("landing.footer.privacy", "Privacy")}
-							</button>
-							<button className="text-gray-600 hover:text-indigo-600 transition-colors">
-								{t("landing.footer.terms", "Terms")}
-							</button>
-							<button className="text-gray-600 hover:text-indigo-600 transition-colors">
-								{t("landing.footer.support", "Support")}
-							</button>
-						</div>
+			<div className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6">
+				<div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+					<div className="flex items-center justify-center">
+						<a 
+							href="https://conferience.com/" 
+							target="_blank" 
+							rel="noopener noreferrer"
+							className="inline-block transition-transform hover:scale-105 hover:opacity-90"
+						>
+							<img 
+								src={conferenceLogo} 
+								alt="Conferience Logo" 
+								className="h-10 w-auto"
+							/>
+						</a>
+					</div>
+					<div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+						<button className="text-gray-600 hover:text-indigo-600 transition-colors">
+							{t("landing.footer.privacy", "Privacy")}
+						</button>
+						<button className="text-gray-600 hover:text-indigo-600 transition-colors">
+							{t("landing.footer.terms", "Terms")}
+						</button>
+						<button className="text-gray-600 hover:text-indigo-600 transition-colors">
+							{t("landing.footer.support", "Support")}
+						</button>
 					</div>
 				</div>
-			</footer>
+			</div>
+		</footer>
 
 			{/* Features Modal */}
 			{showFeatures && <FeaturesPage onClose={() => setShowFeatures(false)} />}

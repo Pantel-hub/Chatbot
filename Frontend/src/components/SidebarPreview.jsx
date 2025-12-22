@@ -1,6 +1,7 @@
 // src/SidebarPreview.jsx
 import React from "react";
 import { useTranslation } from "react-i18next";
+import conferenceLogo from "../assets/conferience_logo-smaller.png";
 
 export default function SidebarPreview({
 	steps,
@@ -163,19 +164,19 @@ export default function SidebarPreview({
 			</div>
 
 			{/* Powered by Conferience.com */}
-			<div className="mt-4 pt-4 border-t border-slate-200">
-				<p className="text-xs text-center">
-					<span className="text-[#5B8BB8]">Powered by </span>
-					<a 
-						href="https://conferience.com/" 
-						target="_blank" 
-						rel="noopener noreferrer"
-						className="text-[#5B8BB8] hover:text-indigo-700 hover:underline transition-colors"
-					>
-						Conferience.com
-					</a>
-					<span className="text-[#5B8BB8]"> © 🐿️</span>
-				</p>
+			<div className="mt-4 pt-4 border-t border-slate-200 text-center">
+				<a 
+					href="https://conferience.com/" 
+					target="_blank" 
+					rel="noopener noreferrer"
+					className="inline-block transition-transform hover:scale-105 hover:opacity-90"
+				>
+					<img 
+						src={conferenceLogo} 
+						alt="Conferience Logo" 
+						className="h-8 w-auto"
+					/>
+				</a>
 			</div>
 		</aside>
 	);
