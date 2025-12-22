@@ -132,7 +132,7 @@ class FaceRecognitionService:
 
         Returns:
             True if registration successful
-            
+
         Raises:
             ValueError: If the face is already registered to a different user
         """
@@ -240,7 +240,6 @@ class FaceRecognitionService:
             # If duplicate check fails, let the system continue rather than blocking
             return None
 
-
     async def verify_face(self, user_id: int, image_data: str) -> Tuple[bool, float]:
         """
         Verify if the provided image matches the registered face for a user
@@ -311,7 +310,9 @@ class FaceRecognitionService:
                     )
                     results = await cursor.fetchall()
 
-            print(f"🎯 [find_matching_user] Found {len(results)} stored face embeddings in DB")
+            print(
+                f"🎯 [find_matching_user] Found {len(results)} stored face embeddings in DB"
+            )
             if not results:
                 logger.info("No face embeddings in database")
                 return None
@@ -333,13 +334,17 @@ class FaceRecognitionService:
 
             # Check if best match is within threshold
             if best_match_distance <= VERIFICATION_THRESHOLD:
-                print(f"✅ [find_matching_user] MATCH FOUND: user_id={best_match_user}, distance={best_match_distance:.4f}")
+                print(
+                    f"✅ [find_matching_user] MATCH FOUND: user_id={best_match_user}, distance={best_match_distance:.4f}"
+                )
                 logger.info(
                     f"Found matching user {best_match_user} with distance {best_match_distance:.4f}"
                 )
                 return best_match_user
             else:
-                print(f"❌ [find_matching_user] NO MATCH: Best distance {best_match_distance:.4f} exceeds threshold {VERIFICATION_THRESHOLD}")
+                print(
+                    f"❌ [find_matching_user] NO MATCH: Best distance {best_match_distance:.4f} exceeds threshold {VERIFICATION_THRESHOLD}"
+                )
                 logger.info(
                     f"No matching user found. Best distance: {best_match_distance:.4f}"
                 )

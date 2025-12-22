@@ -132,7 +132,7 @@ async def process_files_in_background(
     Uploads files to OpenAI and adds them to the vector store.
     """
     try:
-        print(
+        logger.info(
             f"🔄 Background: Processing {len(local_file_paths)} files for chatbot {chatbot_id}"
         )
 
@@ -145,11 +145,11 @@ async def process_files_in_background(
                         file=f, purpose="assistants"
                     )
                     uploaded_file_ids.append(openai_file.id)
-                    print(
+                    logger.info(
                         f"✅ Background: Uploaded file {file_info['filename_key']} -> {openai_file.id}"
                     )
             except Exception as e:
-                print(
+                logger.error(
                     f"❌ Background: Failed to upload file {file_info['filename_key']}: {e}"
                 )
 
@@ -159,7 +159,7 @@ async def process_files_in_background(
                 file_batch = openai_client.beta.vector_stores.file_batches.create(
                     vector_store_id=vector_store_id, file_ids=uploaded_file_ids
                 )
-                print(f"🔄 Background: File batch created: {file_batch.id}")
+                logger.info(f"🔄 Background: File batch created: {file_batch.id}")
 
                 # Poll until processing is complete
                 max_wait = 600  # 10 minutes max
@@ -172,7 +172,7 @@ async def process_files_in_background(
                     )
 
                     if batch_status.status == "completed":
-                        print(
+                        logger.info(
                             f"✅ Background: All files processed successfully for chatbot {chatbot_id}"
                         )
 
@@ -213,12 +213,12 @@ async def process_files_in_background(
                                     )
                                 await conn.commit()
                         except Exception as db_error:
-                            print(
+                            logger.warning(
                                 f"⚠️ Background: Non-critical DB error saving file IDs: {db_error}"
                             )
                         break
                     elif batch_status.status == "failed":
-                        print(
+                        logger.error(
                             f"❌ Background: File batch processing failed for chatbot {chatbot_id}"
                         )
                         break
@@ -226,19 +226,23 @@ async def process_files_in_background(
                     await asyncio.sleep(2)  # Poll every 2 seconds
 
             except Exception as e:
-                print(f"❌ Background: Failed to create file batch: {e}")
+                logger.error(f"❌ Background: Failed to create file batch: {e}")
 
     except Exception as e:
-        print(f"❌ Background: Error processing files for chatbot {chatbot_id}: {e}")
+        logger.error(
+            f"❌ Background: Error processing files for chatbot {chatbot_id}: {e}"
+        )
     finally:
         # Cleanup temp files
         for temp_path in temp_files_to_cleanup:
             try:
                 if os.path.exists(temp_path):
                     os.unlink(temp_path)
-                    print(f"🗑️ Background: Cleaned up temp file {temp_path}")
+                    logger.debug(f"🗑️ Background: Cleaned up temp file {temp_path}")
             except Exception as e:
-                print(f"⚠️ Background: Failed to delete temp file {temp_path}: {e}")
+                logger.warning(
+                    f"⚠️ Background: Failed to delete temp file {temp_path}: {e}"
+                )
 
 
 logging.basicConfig(level=logging.INFO)
@@ -379,13 +383,13 @@ async def insert_company(company_data: dict):
                 await conn.commit()
 
                 inserted_id = cursor.lastrowid
-                print(
+                logger.info(
                     f"Company '{company_data['companyName']}' inserted successfully (id={inserted_id})"
                 )
                 return inserted_id
 
     except Exception as e:
-        print(f"Database error: {str(e)}")
+        logger.error(f"Database error: {str(e)}")
         return False
 
 
@@ -405,7 +409,7 @@ async def get_company_by_api_key(api_key: str):
                     return None
 
     except Exception as e:
-        print(f"Database error: {str(e)}")
+        logger.error(f"Database error: {str(e)}")
         return None
 
 
@@ -419,14 +423,14 @@ async def update_company_script(company_name: str, new_script: str):
                 await conn.commit()
 
                 if cursor.rowcount > 0:
-                    print(f"✅ Script updated for company '{company_name}'")
+                    logger.info(f"✅ Script updated for company '{company_name}'")
                     return True
                 else:
-                    print(f"❌ Company '{company_name}' not found")
+                    logger.info(f"❌ Company '{company_name}' not found")
                     return False
 
     except Exception as e:
-        print(f"❌ Database error: {str(e)}")
+        logger.error(f"❌ Database error: {str(e)}")
         return False
 
 
@@ -869,10 +873,10 @@ async def get_user_profile(user_data: dict = Depends(get_current_user)):
                     (user_id,),
                 )
                 user = await cursor.fetchone()
-                
+
                 if not user:
                     raise HTTPException(status_code=404, detail="User not found")
-                
+
                 # Determine login method based on what's registered
                 # Face: email starts with "face_" (temp email)
                 # Phone: no email but has phone_number
@@ -885,7 +889,7 @@ async def get_user_profile(user_data: dict = Depends(get_current_user)):
                     login_method = "phone"
                 else:
                     login_method = "email"  # fallback
-                
+
                 # Build response based on login method
                 response_data = {
                     "user_id": user["id"],
@@ -893,7 +897,7 @@ async def get_user_profile(user_data: dict = Depends(get_current_user)):
                     "last_name": user["last_name"],
                     "login_method": login_method,
                 }
-                
+
                 # Include contact info based on login method
                 if login_method == "email":
                     response_data["email"] = user["email"]
@@ -901,9 +905,9 @@ async def get_user_profile(user_data: dict = Depends(get_current_user)):
                 elif login_method == "phone":
                     response_data["phone"] = user["phone_number"]
                 # For face login, don't include email/phone since they're not the login method
-                
+
                 return response_data
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -1064,11 +1068,11 @@ async def create_chatbot_unified(
     botAvatar: UploadFile = File(None),  # ← Bot avatar
 ):
     try:
-        print("=" * 60)
-        print("🚀 create_chatbot_unified endpoint called!")
-        print(f"📋 User: {user_data}")
-        print(f"📄 company_info raw: {company_info[:200]}...")
-        print("=" * 60)
+        logger.debug("=" * 60)
+        logger.debug("🚀 create_chatbot_unified endpoint called!")
+        logger.debug(f"📋 User: {user_data}")
+        logger.debug(f"📄 company_info raw: {company_info[:200]}...")
+        logger.debug("=" * 60)
 
         # Parse το JSON string
         company_data = json.loads(company_info)
@@ -1106,13 +1110,13 @@ async def create_chatbot_unified(
         website_data = ""
         if company_info_obj.websiteURL:  # ← Έλεγχος αν υπάρχει URL
             try:
-                print(f"🔄 Starting scraping for: {company_info_obj.websiteURL}")
+                logger.info(f"🔄 Starting scraping for: {company_info_obj.websiteURL}")
                 scraper = ScrapingController()
                 scraped_data = await scraper.scrape_website_async(
                     str(company_info_obj.websiteURL)
                 )
 
-                print(f"📝 Extracting plain text content...")
+                logger.info(f"📝 Extracting plain text content...")
                 structured_content_parts = []
                 main_page_data = scraped_data.get("main_page", {})
                 main_url = main_page_data.get(
@@ -1164,7 +1168,7 @@ async def create_chatbot_unified(
                 website_data_db[company_info_obj.companyName] = website_data
 
             except Exception as e:
-                print(
+                logger.warning(
                     f"⚠️ Website scraping failed (continuing without website data): {e}"
                 )
                 # Δεν κάνουμε raise - απλά συνεχίζουμε με κενό website_data
@@ -1349,7 +1353,7 @@ async def create_chatbot_unified(
                 file_ids=openai_file_ids,
             )
             await conn.commit()
-        print(f"✅ Assistant config saved for company_id={company_id}")
+        logger.info(f"✅ Assistant config saved for company_id={company_id}")
 
         # ====....=====#
 
@@ -1396,9 +1400,9 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
     Επιστρέφει όλα τα chatbots του συνδεδεμένου χρήστη
     """
     user_id = user_data["user_id"]
-    print(f"📊 [GET /user-chatbots] user_id from session: {user_id}")
-    print(f"📊 [GET /user-chatbots] full user_data: {user_data}")
-    logger.info(f"📊 [GET /user-chatbots] user_id from session: {user_id}, email: {user_data.get('email')}")
+    logger.info(
+        f"📊 [GET /user-chatbots] user_id from session: {user_id}, email: {user_data.get('email')}"
+    )
 
     try:
         async with get_db() as conn:
@@ -1406,12 +1410,13 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     "SELECT * FROM auth_sessions WHERE auth_session_id = %s",
-                    (user_data.get('auth_session_id'),)
+                    (user_data.get("auth_session_id"),),
                 )
                 session_rec = await cursor.fetchone()
-                print(f"📍 [GET /user-chatbots] Session record: {dict(session_rec) if session_rec else 'NOT FOUND'}")
-                logger.info(f"📍 [GET /user-chatbots] Session record verified: {dict(session_rec) if session_rec else 'NOT FOUND'}")
-            
+                logger.info(
+                    f"📍 [GET /user-chatbots] Session record verified: {dict(session_rec) if session_rec else 'NOT FOUND'}"
+                )
+
             # Now fetch chatbots
             async with conn.cursor() as cursor:
                 await cursor.execute(
@@ -1426,24 +1431,24 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
                     (user_id,),
                 )
                 chatbots = await cursor.fetchall()
-                print(f"🤖 [GET /user-chatbots] Query result: {len(chatbots)} chatbots found for user_id={user_id}")
-                logger.info(f"🤖 [GET /user-chatbots] Query result: {len(chatbots)} chatbots found for user_id={user_id}")
-                
+                logger.info(
+                    f"🤖 [GET /user-chatbots] Query result: {len(chatbots)} chatbots found for user_id={user_id}"
+                )
+
                 await cursor.execute(
-                    "SELECT * FROM user_chatbots WHERE user_id = %s",
-                    (user_id,)
+                    "SELECT * FROM user_chatbots WHERE user_id = %s", (user_id,)
                 )
                 user_chatbots_records = await cursor.fetchall()
-                print(f"🔗 [GET /user-chatbots] user_chatbots table entries: {len(user_chatbots_records)}")
+                logger.debug(
+                    f"🔗 [GET /user-chatbots] user_chatbots table has {len(user_chatbots_records)} entries for user_id={user_id}"
+                )
                 for record in user_chatbots_records:
-                    print(f"   → {dict(record)}")
-                logger.info(f"🔗 [GET /user-chatbots] user_chatbots table has {len(user_chatbots_records)} entries for user_id={user_id}")
+                    logger.debug(f"   → {dict(record)}")
 
         return {"chatbots": [dict(bot) for bot in chatbots]}
 
     except Exception as e:
-        logger.error(f"Error fetching user chatbots: {e}")
-        print(f"❌ [GET /user-chatbots] Error: {e}")
+        logger.error(f"❌ [GET /user-chatbots] Error: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch chatbots")
 
 
@@ -1560,10 +1565,12 @@ async def update_chatbot(
     # 6) Auto-detect if website URL changed
     new_website_url = str(data.get("websiteURL") or "").strip()
     url_changed = new_website_url != stored_website_url
-    
+
     # If URL changed and there's a new URL, automatically trigger rescrape
     if url_changed and new_website_url and not rescrape:
-        logger.info(f"🔄 Website URL changed from '{stored_website_url}' to '{new_website_url}' - auto-triggering rescrape")
+        logger.info(
+            f"🔄 Website URL changed from '{stored_website_url}' to '{new_website_url}' - auto-triggering rescrape"
+        )
         rescrape = True
 
     # 7) Website Data - 3 options
@@ -1591,10 +1598,11 @@ async def update_chatbot(
                 # Check if main page scraping failed
                 if main_page_data.get("status") != "success":
                     error_msg = main_page_data.get("error", "Unknown error")
-                    logger.error(f"❌ Main page scraping failed for {main_url}: {error_msg}")
+                    logger.error(
+                        f"❌ Main page scraping failed for {main_url}: {error_msg}"
+                    )
                     raise HTTPException(
-                        status_code=500, 
-                        detail=f"Failed to scrape website: {error_msg}"
+                        status_code=500, detail=f"Failed to scrape website: {error_msg}"
                     )
 
                 # 1) Κύρια σελίδα (main_page)
@@ -1636,13 +1644,15 @@ async def update_chatbot(
                 logger.info(
                     f"✅ Re-scraped structured website data length: {len(website_data_to_save)} characters"
                 )
-                
+
                 # Validate that we actually got website content
                 if len(website_data_to_save.strip()) < 100:
-                    logger.error(f"❌ Scraping produced insufficient content ({len(website_data_to_save)} chars)")
+                    logger.error(
+                        f"❌ Scraping produced insufficient content ({len(website_data_to_save)} chars)"
+                    )
                     raise HTTPException(
-                        status_code=500, 
-                        detail="Failed to extract meaningful content from website. Please check if the website is accessible and contains text content."
+                        status_code=500,
+                        detail="Failed to extract meaningful content from website. Please check if the website is accessible and contains text content.",
                     )
 
             except Exception as e:

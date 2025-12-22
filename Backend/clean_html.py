@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup, Comment
+﻿from bs4 import BeautifulSoup, Comment
 
 # HTML5 void elements (tags that don't need a closing tag and can't have content)
 VOID_ELEMENTS = {
@@ -118,7 +118,11 @@ def clean_html_for_content(
                             if ":" in decl:
                                 parts = decl.split(":", 1)
                                 # Safety check: ensure we got exactly 2 parts and both are non-empty
-                                if len(parts) == 2 and parts[0].strip() and parts[1].strip():
+                                if (
+                                    len(parts) == 2
+                                    and parts[0].strip()
+                                    and parts[1].strip()
+                                ):
                                     prop, val = parts
                                     current_styles[prop.strip().lower()] = val.strip()
                                 # Skip malformed CSS declarations silently

@@ -166,4 +166,6 @@ def get_supported_formats():
         "MD",
         "ORG",
         "RST",
+        "JSON",
+        "YAML",
     ]
