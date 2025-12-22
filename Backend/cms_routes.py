@@ -475,6 +475,7 @@ class VerifyLoginOtpRequest(BaseModel):
 class SendOtpRequest(BaseModel):
     contact: str
     method: Literal["email", "sms"]
+    language: Optional[str] = "el"
 
 
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -685,10 +686,16 @@ async def send_otp(request: SendOtpRequest):
                     )
 
                 if await cursor.fetchone():
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Το στοιχείο επικοινωνίας είναι ήδη καταχωρημένο",
-                    )
+                    if request.language == "en":
+                        raise HTTPException(
+                            status_code=400,
+                            detail="This user already exists, login here",
+                        )
+                    else:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="Το στοιχείο επικοινωνίας είναι ήδη καταχωρημένο, συνδεθείτε εδώ",
+                        )
 
             otp_code = await create_otp_entry(conn, request.contact, purpose="register")
 
