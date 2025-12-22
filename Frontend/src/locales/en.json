@@ -5,6 +5,7 @@
   "companyName": "Company Name",
   "companyLogo": "Company Logo",
   "logoPreviewAlt": "Logo preview",
+  "contactEmail": "Contact Email",
   "industry": "Industry",
   "selectIndustry": "Select industry",
   "other": "Other (please specify)",

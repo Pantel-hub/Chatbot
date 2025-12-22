@@ -306,7 +306,7 @@ export default function BasicInfo({
 								htmlFor="contactEmail"
 								className={labelClasses}
 							>
-								{t("contactEmail", "Email Επικοινωνίας")}
+							{t("contactEmail")}
 								{requiredMark}
 							</label>
 							<div className="relative">
