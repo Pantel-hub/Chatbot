@@ -383,11 +383,11 @@
       "title": "Powerful Features",
       "aiChatbot": {
         "title": "AI-Powered Chatbot",
-        "desc": "Create intelligent chatbots without coding using GPT-4."
+        "desc": "Create intelligent chatbots without coding using AI."
       },
       "websiteKnowledge": {
         "title": "Website Knowledge Base",
-        "desc": "Automatically scrape and index your company website for instant AI knowledge."
+        "desc": "Automatic collection of information from your website and other information sources."
       },
       "multiLanguage": {
         "title": "Multi-Language Support",
