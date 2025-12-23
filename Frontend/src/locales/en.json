@@ -186,8 +186,24 @@
       "greeting": "Welcome! I’m your AI assistant. How can I help?",
       "botName": "AI Assistant"
     }
+  },  "bots": {
+    "created": "Created",
+    "statusActive": "Active",
+    "statusPaused": "Paused",
+    "status": "Status",
+    "active": "Active",
+    "paused": "Paused",
+    "pause": "Pause",
+    "activate": "Activate",
+    "edit": "Edit",
+    "delete": "Delete",
+    "rename": "Rename",
+    "renameTitle": "Rename Bot",
+    "newName": "New Bot Name",
+    "namePlaceholder": "Enter new bot name..."
   },
-  "analytics": {
+  "saving": "Saving...",
+  "save": "Save",  "analytics": {
     "title": "Performance Overview",
     "lastUpdated": "Last updated: {{time}}",
     "autoRefresh": "Auto refresh",

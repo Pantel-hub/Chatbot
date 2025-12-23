@@ -28,6 +28,9 @@ export const API_ENDPOINTS = {
 	deleteChatbot: (chatbotId) =>
 		`${BASE_URL}/api/cms/delete_chatbot/${chatbotId}`,
 
+	renameChatbot: (chatbotId) =>
+		`${BASE_URL}/api/cms/rename_chatbot/${chatbotId}`,
+
 	// Widget/Public endpoints - προσθήκη /api/public prefix
 	calendarAuth: (apiKey) => `${BASE_URL}/api/public/calendar-auth/${apiKey}`,
 	availableSlots: (apiKey, date) =>

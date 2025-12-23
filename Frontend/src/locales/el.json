@@ -187,6 +187,24 @@
       "botName": "AI Βοηθός"
     }
   },
+  "bots": {
+    "created": "Δημιουργήθηκε",
+    "statusActive": "Ενεργό",
+    "statusPaused": "Παύση",
+    "status": "Κατάσταση",
+    "active": "Ενεργό",
+    "paused": "Σε παύση",
+    "pause": "Παύση",
+    "activate": "Ενεργοποίηση",
+    "edit": "Επεξεργασία",
+    "delete": "Διαγραφή",
+    "rename": "Μετονομασία",
+    "renameTitle": "Μετονομασία Bot",
+    "newName": "Νέο Όνομα Bot",
+    "namePlaceholder": "Εισάγετε νέο όνομα bot..."
+  },
+  "saving": "Αποθήκευση...",
+  "save": "Αποθήκευση",
   "analytics": {
     "title": "Επισκόπηση Απόδοσης",
     "lastUpdated": "Τελευταία ενημέρωση: {{time}}",

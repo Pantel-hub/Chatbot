@@ -14,6 +14,8 @@ import {
 	Trash2,
 	LogOut,
 	Edit3,
+	Edit,
+	X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -79,6 +81,11 @@ export default function Dashboard({
 	const [bots, setBots] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [deletingId, setDeletingId] = useState(null);
+	const [openMenuId, setOpenMenuId] = useState(null); // For MoreHorizontal menu
+	const [renameModalOpen, setRenameModalOpen] = useState(false);
+	const [renamingBotId, setRenamingBotId] = useState(null);
+	const [newBotName, setNewBotName] = useState("");
+	const [renaming, setRenaming] = useState(false);
 
 	useEffect(() => {
 		fetchUserBots();
@@ -210,6 +217,55 @@ export default function Dashboard({
 		} finally {
 			setDeletingId(null);
 		}
+	};
+
+	const handleRename = async () => {
+		if (!newBotName.trim()) {
+			alert("Το όνομα του bot δεν μπορεί να είναι άδειο");
+			return;
+		}
+
+		try {
+			setRenaming(true);
+			console.log("[Dashboard] ✏️ Μετονομασία bot:", renamingBotId, "→", newBotName);
+
+			const res = await fetch(API_ENDPOINTS.renameChatbot(renamingBotId), {
+				method: "PUT",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ botName: newBotName.trim() }),
+			});
+
+			if (!res.ok) {
+				throw new Error(`HTTP ${res.status}`);
+			}
+
+			// Update local state
+			setBots((prev) =>
+				prev.map((b) =>
+					b.id === renamingBotId ? { ...b, name: newBotName.trim() } : b
+				)
+			);
+
+			console.log("[Dashboard] ✅ Μετονομασία επιτυχής:", renamingBotId);
+			setRenameModalOpen(false);
+			setRenamingBotId(null);
+			setNewBotName("");
+			setOpenMenuId(null);
+			alert("Το bot μετονομάστηκε με επιτυχία!");
+		} catch (err) {
+			console.error("[Dashboard] ❌ Αποτυχία μετονομασίας:", err);
+			alert("Η μετονομασία απέτυχε. Προσπαθήστε ξανά.");
+		} finally {
+			setRenaming(false);
+		}
+	};
+
+	const openRenameModal = (botId, currentName) => {
+		setRenamingBotId(botId);
+		setNewBotName(currentName);
+		setRenameModalOpen(true);
+		setOpenMenuId(null);
 	};
 
 	// ---------- UI ----------
@@ -453,12 +509,35 @@ export default function Dashboard({
 												</div>
 											</div>
 											<button
-												className="p-2 rounded-lg hover:bg-gray-100"
-												onClick={(e) =>
-													e.stopPropagation()
-												}
-											>
-												<MoreHorizontal className="h-4 w-4 text-gray-500" />
+											className="relative p-2 rounded-lg hover:bg-gray-100"
+											onClick={(e) => {
+												e.stopPropagation();
+												setOpenMenuId(
+													openMenuId === b.id ? null : b.id
+												);
+											}}
+										>
+											<MoreHorizontal className="h-4 w-4 text-gray-500" />
+											{openMenuId === b.id && (
+												<div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[150px]">
+													<button
+														onClick={(e) => {
+															e.stopPropagation();
+															openRenameModal(
+																b.id,
+																b.name
+															);
+														}}
+														className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
+													>
+														<Edit className="h-4 w-4" />
+														{t(
+															"bots.rename",
+															"Rename"
+														)}
+													</button>
+												</div>
+											)}
 											</button>
 										</div>
 
@@ -560,6 +639,73 @@ export default function Dashboard({
 					</Section>
 				</div>
 			</div>
-		</div>
+
+			{/* Rename Modal */}
+			{renameModalOpen && (
+			<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+				<div className="bg-white rounded-lg shadow-xl p-6 w-96 max-w-[90vw]">
+					<div className="flex items-center justify-between mb-4">
+						<h3 className="text-lg font-semibold text-gray-900">
+							{t("bots.renameTitle", "Rename Bot")}
+						</h3>
+						<button
+							onClick={() => {
+								setRenameModalOpen(false);
+								setRenamingBotId(null);
+								setNewBotName("");
+							}}
+							className="p-1 hover:bg-gray-100 rounded"
+						>
+							<X className="h-5 w-5 text-gray-500" />
+						</button>
+					</div>
+
+					<div className="mb-6">
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							{t("bots.newName", "New Bot Name")}
+						</label>
+						<input
+							type="text"
+							value={newBotName}
+							onChange={(e) => setNewBotName(e.target.value)}
+							onKeyPress={(e) => {
+								if (e.key === "Enter" && !renaming) {
+									handleRename();
+								}
+							}}
+							placeholder={t(
+								"bots.namePlaceholder",
+								"Enter new bot name..."
+							)}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							autoFocus
+						/>
+					</div>
+
+					<div className="flex gap-2 justify-end">
+						<button
+							onClick={() => {
+								setRenameModalOpen(false);
+								setRenamingBotId(null);
+								setNewBotName("");
+							}}
+							className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+						>
+							{t("cancel", "Cancel")}
+						</button>
+						<button
+							onClick={handleRename}
+							disabled={renaming || !newBotName.trim()}
+							className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+						>
+							{renaming
+								? t("saving", "Saving...")
+								: t("save", "Save")}
+						</button>
+					</div>
+				</div>
+			</div>
+		)}
+	</div>
 	);
 }

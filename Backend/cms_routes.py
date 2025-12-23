@@ -2325,6 +2325,55 @@ async def get_company_analytics(
         raise HTTPException(status_code=500, detail="Failed to fetch analytics")
 
 
+@router.put("/rename_chatbot/{chatbot_id}")
+async def rename_chatbot(
+    chatbot_id: int, 
+    body: dict = Body(...),
+    user_data: dict = Depends(get_current_user)
+):
+    """
+    Μετονομάζει ένα chatbot ΜΟΝΟ αν ανήκει στον συνδεδεμένο χρήστη.
+    """
+    user_id = user_data["user_id"]
+    new_name = body.get("botName", "").strip()
+
+    if not new_name:
+        raise HTTPException(status_code=400, detail="Bot name cannot be empty")
+
+    async with get_db() as conn:
+        async with conn.cursor() as cursor:
+            try:
+                # 1) Έλεγχος ιδιοκτησίας
+                await cursor.execute(
+                    "SELECT 1 FROM user_chatbots WHERE user_id=%s AND chatbot_id=%s LIMIT 1",
+                    (user_id, chatbot_id),
+                )
+                if not await cursor.fetchone():
+                    raise HTTPException(status_code=403, detail="Access denied")
+
+                # 2) Ενημέρωση ονόματος
+                await cursor.execute(
+                    "UPDATE companies SET botName=%s WHERE id=%s",
+                    (new_name, chatbot_id),
+                )
+                if cursor.rowcount == 0:
+                    raise HTTPException(status_code=404, detail="Chatbot not found")
+
+                await conn.commit()
+                logging.info(
+                    "✏️ Renamed chatbot_id=%s by user_id=%s to '%s'", 
+                    chatbot_id, user_id, new_name
+                )
+                return {"success": True, "message": "Bot renamed successfully"}
+
+            except HTTPException:
+                raise
+            except Exception as e:
+                logger.exception(f"❌ Rename failed for chatbot_id={chatbot_id}: {e}")
+                await conn.rollback()
+                raise HTTPException(status_code=500, detail="Rename failed")
+
+
 @router.delete("/delete_chatbot/{chatbot_id}")
 async def delete_chatbot(chatbot_id: int, user_data: dict = Depends(get_current_user)):
     """
