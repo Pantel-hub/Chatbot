@@ -338,7 +338,6 @@ export default function BasicInfo({
 									}`}
 									placeholder="info@company.gr"
 									required
-									disabled={disabled}
 								/>
 							</div>
 							{errors.contactEmail && (
@@ -531,7 +530,7 @@ export default function BasicInfo({
 									}`}
 									placeholder={t("placeholders.website")}
 									inputMode="url"
-									disabled={disabled}
+
 								/>
 							</div>
 							{errors.websiteURL && (
@@ -565,7 +564,7 @@ export default function BasicInfo({
 									}`}
 									placeholder={t("placeholders.domain")}
 									inputMode="url"
-									disabled={disabled}
+
 								/>
 							</div>
 							{errors.allowedDomains && (

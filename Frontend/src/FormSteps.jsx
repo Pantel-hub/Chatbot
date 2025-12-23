@@ -270,13 +270,6 @@ export default function FormSteps({
 				);
 			}
 			
-			// Load existing logo and bot avatar
-			if (bot.logo_url) {
-				setLogoFile(bot.logo_url); // Set as data URL string
-			}
-			if (bot.botAvatar) {
-				setBotAvatarFile(bot.botAvatar); // Set as data URL string
-			}
 		} catch (error) {
 			console.error("Error fetching chatbot:", error);
 			alert("Failed to load chatbot data");
@@ -310,25 +303,19 @@ export default function FormSteps({
 			const { name, value, files } = e.target;
 
 			// Handle file inputs
-			if (files !== undefined) {
+			if (files && files.length > 0) {
 				if (name === "logo") {
-					if (files.length > 0) {
+					
 						setLogoFile(files[0]);
 						// Αν δεν υπάρχει botAvatar, χρησιμοποίησε το λογότυπο
 						if (!botAvatarFile) {
 							setBotAvatarFile(files[0]);
-						}
-					} else {
-						// Remove logo
-						setLogoFile(null);
+						
 					}
 				} else if (name === "botAvatar") {
-					if (files.length > 0) {
+					
 						setBotAvatarFile(files[0]);
-					} else {
-						// Remove bot avatar
-						setBotAvatarFile(null);
-					}
+					
 				}
 				return;
 			}
@@ -337,7 +324,7 @@ export default function FormSteps({
 			setFormData((prev) => ({ ...prev, [name]: value }));
 			if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
 		},
-		[errors, botAvatarFile]
+		[errors]
 	);
 
 	const handleSubmit = async (e) => {
