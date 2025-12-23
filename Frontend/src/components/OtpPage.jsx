@@ -48,6 +48,7 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					contact: contact,
+					language: i18n.language,
 				}),
 			});
 
@@ -318,11 +319,51 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 					{/* Errors */}
 					{error && (
 						<div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
-							{error}
-						</div>
-					)}
+						{typeof error === 'string' && error.includes('εδώ') ? (
+							<div>
+								{error.split('εδώ')[0]}
+								<button
+									type="button"
+									onClick={() => {
+										setOtpSent(false);
+										setContact("");
+										setOtp("");
+										setError("");
+										// Trigger navigation to login if onCancel is available
+										if (onCancel) onCancel();
+									}}
+									className="text-red-600 hover:text-red-800 underline font-semibold"
+								>
+									εδώ
+								</button>
+								{error.split('εδώ')[1]}
+							</div>
+						) : typeof error === 'string' && error.includes('here') ? (
+							<div>
+								{error.split('here')[0]}
+								<button
+									type="button"
+									onClick={() => {
+										setOtpSent(false);
+										setContact("");
+										setOtp("");
+										setError("");
+										// Trigger navigation to login if onCancel is available
+										if (onCancel) onCancel();
+									}}
+									className="text-red-600 hover:text-red-800 underline font-semibold"
+								>
+									here
+								</button>
+								{error.split('here')[1]}
+							</div>
+						) : (
+							error
+						)}
+					</div>
+				)}
 
-					{/* Actions row */}
+				{/* Actions row */}
 					<div className="flex items-center justify-between">
 						{otpSent ? (
 							<button
