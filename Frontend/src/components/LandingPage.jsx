@@ -40,7 +40,7 @@ export default function LandingPage({
 								className="h-7 w-7 sm:h-9 sm:w-9"
 							/>
 							<span className="text-base sm:text-lg font-bold tracking-tight">
-								{t("landing.brand", "Grimbot")}
+								{t("landing.brand", "Katinabot")}
 							</span>
 						</div>
 						<nav className="hidden md:flex items-center gap-4 lg:gap-6 text-sm">

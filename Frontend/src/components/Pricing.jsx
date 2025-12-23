@@ -55,7 +55,7 @@ export default function Pricing({ onBack }) {
 								className="h-7 w-7 sm:h-9 sm:w-9"
 							/>
 							<span className="text-base sm:text-lg font-bold tracking-tight">
-								grimbot
+								katinabot
 							</span>
 						</div>
 					</div>
@@ -229,7 +229,7 @@ export default function Pricing({ onBack }) {
 					<div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
 						<p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
 							© {new Date().getFullYear()}{" "}
-							{t("landing.brand", "Grimbot")}.{" "}
+						{t("landing.brand", "Katinabot")}.{" "}
 							{t(
 								"landing.footer.allRights",
 								"All rights reserved."

@@ -179,49 +179,49 @@ export default function Analytics({
 		return {
 			todayStats: {
 				messages: {
-					title: "Messages Today",
+					title: t("analytics.messagesTitle"),
 					value: formatValue(today.messages),
 					icon: ChatBubbleOvalLeftEllipsisIcon,
 					color: "#2563eb",
 				},
 				userMessages: {
-					title: "User Messages",
+					title: t("analytics.userMessagesTitle"),
 					value: formatValue(today.user_messages),
 					icon: UserGroupIcon,
 					color: "#0ea5e9",
 				},
 				assistantMessages: {
-					title: "Assistant Messages",
+					title: t("analytics.assistantMessagesTitle"),
 					value: formatValue(today.assistant_messages),
 					icon: ChatBubbleOvalLeftEllipsisIcon,
 					color: "#22c55e",
 				},
 				sessions: {
-					title: "Sessions Today",
+					title: t("analytics.sessionsTodayTitle"),
 					value: formatValue(today.sessions),
 					icon: UserGroupIcon,
 					color: "#6366f1",
 				},
 				avgResponse: {
-					title: "Avg Response Time (Today)",
+					title: t("analytics.avgResponseTimeToday"),
 					value: formatSeconds(today.avg_response_time_seconds),
 					icon: ChartBarIcon,
 					color: "#16a34a",
 				},
 				satisfaction: {
-					title: "Satisfaction (Today)",
+					title: t("analytics.satisfactionToday"),
 					value: formatRating(today.avg_rating, today.ratings_count),
 					icon: ShieldCheckIcon,
 					color: "#d97706",
 				},
 				activeSessions: {
-					title: "Active Sessions Now",
+					title: t("analytics.activeSessionsNow"),
 					value: formatValue(today.active_sessions),
 					icon: ArrowTrendingUpIcon,
 					color: "#f43f5e",
 				},
 				lastMessageAt: {
-					title: "Last Message At",
+					title: t("analytics.lastMessageAt"),
 					value: formatDateTime(today.last_message_at),
 					icon: ArrowTrendingUpIcon,
 					color: "#64748b",
@@ -229,37 +229,37 @@ export default function Analytics({
 			},
 			totalStats: {
 				messages: {
-					title: "Total Messages",
+					title: t("analytics.totalMessages"),
 					value: formatValue(totals.messages),
 					icon: ChatBubbleOvalLeftEllipsisIcon,
 					color: "#2563eb",
 				},
 				userMessages: {
-					title: "Total User Messages",
+					title: t("analytics.totalUserMessages"),
 					value: formatValue(totals.user_messages),
 					icon: UserGroupIcon,
 					color: "#0ea5e9",
 				},
 				assistantMessages: {
-					title: "Total Assistant Messages",
+					title: t("analytics.totalAssistantMessages"),
 					value: formatValue(totals.assistant_messages),
 					icon: ChatBubbleOvalLeftEllipsisIcon,
 					color: "#22c55e",
 				},
 				sessions: {
-					title: "Total Sessions",
+					title: t("analytics.totalSessions"),
 					value: formatValue(totals.sessions),
 					icon: UserGroupIcon,
 					color: "#6366f1",
 				},
 				avgResponse: {
-					title: "Avg Response Time (Overall)",
+					title: t("analytics.avgResponseTimeOverall"),
 					value: formatSeconds(totals.avg_response_time_seconds),
 					icon: ChartBarIcon,
 					color: "#16a34a",
 				},
 				satisfaction: {
-					title: "Avg Satisfaction (Overall)",
+					title: t("analytics.avgSatisfactionOverall"),
 					value: formatRating(
 						totals.avg_rating,
 						totals.ratings_count
@@ -269,7 +269,7 @@ export default function Analytics({
 				},
 			},
 		};
-	}, [data]);
+	}, [data, t]);
 
 	return (
 		<div

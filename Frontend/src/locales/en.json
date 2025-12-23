@@ -193,6 +193,22 @@
     "autoRefresh": "Auto refresh",
     "refresh": "Refresh",
     "error": "Failed to load analytics ({{error}}). Please try again.",
+    "today": "Today",
+    "overall": "Overall",
+    "messagesTitle": "Messages Today",
+    "userMessagesTitle": "User Messages",
+    "assistantMessagesTitle": "Assistant Messages",
+    "sessionsTodayTitle": "Sessions Today",
+    "avgResponseTimeToday": "Avg Response Time (Today)",
+    "satisfactionToday": "Satisfaction (Today)",
+    "activeSessionsNow": "Active Sessions Now",
+    "lastMessageAt": "Last Message At",
+    "totalMessages": "Total Messages",
+    "totalUserMessages": "Total User Messages",
+    "totalAssistantMessages": "Total Assistant Messages",
+    "totalSessions": "Total Sessions",
+    "avgResponseTimeOverall": "Avg Response Time (Overall)",
+    "avgSatisfactionOverall": "Avg Satisfaction (Overall)",
     "stats": {
       "totalChats": "Total Chats",
       "avgResponseTime": "Average Response Time",
@@ -353,7 +369,7 @@
   "contact": {
     "title": "Contact Us",
     "pageTitle": "Get in Touch",
-    "subtitle": "Have questions about grimbot? We'd love to hear from you.",
+    "subtitle": "Have questions about katinabot? We'd love to hear from you.",
     "back": "Back",
     "email": "Email",
     "phone": "Phone",
@@ -362,7 +378,7 @@
     "footer": "All rights reserved."
   },
   "landing": {
-    "brand": "Grimbot",
+    "brand": "Katinabot",
     "nav": {
       "features": "Features",
       "signIn": "Sign In",

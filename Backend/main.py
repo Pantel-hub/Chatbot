@@ -86,17 +86,20 @@ class PathBasedCORSMiddleware(BaseHTTPMiddleware):
                     resp.headers["Access-Control-Max-Age"] = "600"
                 # αν δεν είναι whitelisted, αφήνουμε 204 χωρίς ACAO -> ο browser θα μπλοκάρει
             elif path.startswith("/api/public"):
-                # Public endpoints: allow all origins with credentials support
-                if origin:
+                # Public endpoints: allow all origins including file:// (null origin)
+                if origin and origin != "null":
                     resp.headers["Access-Control-Allow-Origin"] = origin
+                    resp.headers["Access-Control-Allow-Credentials"] = "true"
+                elif origin == "null":
+                    # file:// URLs send "null" as origin
+                    resp.headers["Access-Control-Allow-Origin"] = "null"
                 else:
                     resp.headers["Access-Control-Allow-Origin"] = "*"
-                resp.headers["Access-Control-Allow-Credentials"] = "true"
                 resp.headers["Access-Control-Allow-Methods"] = ", ".join(
                     sorted(PUBLIC_METHODS)
                 )
-                resp.headers["Access-Control-Allow-Headers"] = acr_headers or ", ".join(
-                    sorted(PUBLIC_HEADERS)
+                resp.headers["Access-Control-Allow-Headers"] = (
+                    acr_headers or PUBLIC_HEADERS
                 )
                 resp.headers["Access-Control-Max-Age"] = (
                     "600"  # ενημερώνει τον browser (client) για το πόσο χρόνο (σε δευτερόλεπτα) μπορεί να αποθηκεύσει (cache) τις πληροφορίες έγκρισης από τον CORS Preflight request.
@@ -120,12 +123,15 @@ class PathBasedCORSMiddleware(BaseHTTPMiddleware):
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
         elif path.startswith("/api/public"):
-            # For public endpoints with credentials
-            if origin:
+            # For public endpoints - handle file:// origins and credentials properly
+            if origin and origin != "null":
                 response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+            elif origin == "null":
+                # file:// URLs send "null" as origin
+                response.headers["Access-Control-Allow-Origin"] = "null"
             else:
                 response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Credentials"] = "true"
 
         return response
 

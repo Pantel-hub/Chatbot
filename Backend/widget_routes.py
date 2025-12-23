@@ -512,14 +512,27 @@ async def chat_with_company(
                 traceback.print_exc()
                 yield f"data: {json.dumps({'error': 'Assistant error occurred'})}\n\n"
 
+        # Build CORS headers for streaming response
+        cors_headers = {
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        }
+
+        # Add CORS headers based on origin
+        origin = request.headers.get("origin")
+        if origin == "null":
+            cors_headers["Access-Control-Allow-Origin"] = "null"
+        elif origin:
+            cors_headers["Access-Control-Allow-Origin"] = origin
+            cors_headers["Access-Control-Allow-Credentials"] = "true"
+        else:
+            cors_headers["Access-Control-Allow-Origin"] = "*"
+
         return StreamingResponse(
             stream_response(),
             media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "X-Accel-Buffering": "no",
-                "Connection": "keep-alive",
-            },
+            headers=cors_headers,
         )
 
     except HTTPException:

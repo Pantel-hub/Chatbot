@@ -193,6 +193,22 @@
     "autoRefresh": "Αυτόματη ανανέωση",
     "refresh": "Ανανέωση",
     "error": "Αποτυχία φόρτωσης analytics ({{error}}). Δοκιμάστε ξανά.",
+    "today": "Σήμερα",
+    "overall": "Συνολικά",
+    "messagesTitle": "Μηνύματα Σήμερα",
+    "userMessagesTitle": "Μηνύματα Χρηστών",
+    "assistantMessagesTitle": "Μηνύματα Βοηθού",
+    "sessionsTodayTitle": "Συνεδρίες Σήμερα",
+    "avgResponseTimeToday": "Μέσος Χρόνος Απόκρισης (Σήμερα)",
+    "satisfactionToday": "Ικανοποίηση (Σήμερα)",
+    "activeSessionsNow": "Ενεργές Συνεδρίες Τώρα",
+    "lastMessageAt": "Τελευταίο Μήνυμα Στις",
+    "totalMessages": "Συνολικά Μηνύματα",
+    "totalUserMessages": "Συνολικά Μηνύματα Χρηστών",
+    "totalAssistantMessages": "Συνολικά Μηνύματα Βοηθού",
+    "totalSessions": "Συνολικές Συνεδρίες",
+    "avgResponseTimeOverall": "Μέσος Χρόνος Απόκρισης (Συνολικά)",
+    "avgSatisfactionOverall": "Μέση Ικανοποίηση (Συνολικά)",
     "stats": {
       "totalChats": "Συνολικές Συνομιλίες",
       "avgResponseTime": "Μέσος Χρόνος Απόκρισης",
@@ -356,7 +372,7 @@
   "contact": {
     "title": "Επικοινωνία",
     "pageTitle": "Επικοινωνήστε Μαζί Μας",
-    "subtitle": "Έχετε ερωτήσεις για το grimbot? Θα χαρούμε να σας ακούσουμε.",
+    "subtitle": "Έχετε ερωτήσεις για το katinabot? Θα χαρούμε να σας ακούσουμε.",
     "back": "Πίσω",
     "email": "Email",
     "phone": "Τηλέφωνο",
@@ -365,7 +381,7 @@
     "footer": "Με την επιφύλαξη παντός δικαιώματος."
   },
   "landing": {
-    "brand": "Grimbot",
+    "brand": "Katinabot",
     "nav": {
       "features": "Χαρακτηριστικά",
       "signIn": "Σύνδεση",
