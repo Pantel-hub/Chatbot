@@ -321,7 +321,7 @@ export default function Analytics({
 				)}
 
 				<div className="mb-2 text-xs sm:text-sm font-semibold text-slate-500">
-					Σήμερα
+				{t("analytics.todaySection")}
 				</div>
 				<div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
 					<StatCard
@@ -361,7 +361,7 @@ export default function Analytics({
 				<div className="my-6 h-px bg-slate-200" />
 
 				<div className="mb-2 text-xs sm:text-sm font-semibold text-slate-500">
-					Σύνολα
+				{t("analytics.totalsSection")}
 				</div>
 				<div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
 					<StatCard

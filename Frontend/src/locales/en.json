@@ -195,6 +195,8 @@
     "error": "Failed to load analytics ({{error}}). Please try again.",
     "today": "Today",
     "overall": "Overall",
+    "todaySection": "Today",
+    "totalsSection": "Totals",
     "messagesTitle": "Messages Today",
     "userMessagesTitle": "User Messages",
     "assistantMessagesTitle": "Assistant Messages",
