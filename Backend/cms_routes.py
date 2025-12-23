@@ -132,7 +132,7 @@ async def process_files_in_background(
     Uploads files to OpenAI and adds them to the vector store.
     """
     try:
-        logger.info(
+        print(
             f"🔄 Background: Processing {len(local_file_paths)} files for chatbot {chatbot_id}"
         )
 
@@ -145,7 +145,7 @@ async def process_files_in_background(
                         file=f, purpose="assistants"
                     )
                     uploaded_file_ids.append(openai_file.id)
-                    logger.info(
+                    print(
                         f"✅ Background: Uploaded file {file_info['filename_key']} -> {openai_file.id}"
                     )
             except Exception as e:
@@ -159,7 +159,7 @@ async def process_files_in_background(
                 file_batch = openai_client.beta.vector_stores.file_batches.create(
                     vector_store_id=vector_store_id, file_ids=uploaded_file_ids
                 )
-                logger.info(f"🔄 Background: File batch created: {file_batch.id}")
+                print(f"🔄 Background: File batch created: {file_batch.id}")
 
                 # Poll until processing is complete
                 max_wait = 600  # 10 minutes max
@@ -172,7 +172,7 @@ async def process_files_in_background(
                     )
 
                     if batch_status.status == "completed":
-                        logger.info(
+                        print(
                             f"✅ Background: All files processed successfully for chatbot {chatbot_id}"
                         )
 
@@ -272,9 +272,9 @@ def get_cached_test_data(user_id: int, chatbot_id: int) -> Optional[dict]:
         cache_key = get_test_cache_key(user_id, chatbot_id)
         data = redis_client.get(cache_key)
         if data:
-            logger.info(f"Test cache HIT for user {user_id}, chatbot {chatbot_id}")
+            print(f"Test cache HIT for user {user_id}, chatbot {chatbot_id}")
             return json.loads(data)
-        logger.info(f"Test cache MISS for user {user_id}, chatbot {chatbot_id}")
+        print(f"Test cache MISS for user {user_id}, chatbot {chatbot_id}")
         return None
     except Exception as e:
         logger.error(f"Redis get error: {e}")
@@ -294,7 +294,7 @@ def cache_test_data(
             }
         )
         redis_client.setex(cache_key, ttl, data)
-        logger.info(
+        print(
             f"Cached test data for user {user_id}, chatbot {chatbot_id} (TTL: {ttl}s)"
         )
         return True
@@ -311,18 +311,18 @@ async def cleanup_test_session(user_id: int, chatbot_id: int) -> bool:
         if data:
             cached_data = json.loads(data)
             thread_id = cached_data.get("thread_id")
-            logger.info(f"Found thread_id {thread_id} in cache for cleanup.")
+            print(f"Found thread_id {thread_id} in cache for cleanup.")
     except Exception as e:
         logger.error(f"Redis lookup error during cleanup for key {cache_key}: {e}")
     if thread_id:
         try:
             openai_client.beta.threads.delete(thread_id)
-            logger.info(f"Deleted OpenAI thread: {thread_id}")
+            print(f"Deleted OpenAI thread: {thread_id}")
         except Exception as e:
             logger.warning(f"Failed to delete OpenAI thread {thread_id}: {e}")
     try:
         redis_client.delete(cache_key)
-        logger.info(f"Deleted Redis key: {cache_key}")
+        print(f"Deleted Redis key: {cache_key}")
         return True
     except Exception as e:
         logger.error(f"Redis deletion error for key {cache_key}: {e}")
@@ -383,7 +383,7 @@ async def insert_company(company_data: dict):
                 await conn.commit()
 
                 inserted_id = cursor.lastrowid
-                logger.info(
+                print(
                     f"Company '{company_data['companyName']}' inserted successfully (id={inserted_id})"
                 )
                 return inserted_id
@@ -423,10 +423,10 @@ async def update_company_script(company_name: str, new_script: str):
                 await conn.commit()
 
                 if cursor.rowcount > 0:
-                    logger.info(f"✅ Script updated for company '{company_name}'")
+                    print(f"✅ Script updated for company '{company_name}'")
                     return True
                 else:
-                    logger.info(f"❌ Company '{company_name}' not found")
+                    print(f"❌ Company '{company_name}' not found")
                     return False
 
     except Exception as e:
@@ -653,7 +653,7 @@ async def verify_login_otp(response: Response, request: VerifyLoginOtpRequest):
             path="/",
         )
 
-        logger.info(f"User {user_id} logged in successfully")
+        print(f"User {user_id} logged in successfully")
 
         return {
             "status": "success",
@@ -722,7 +722,7 @@ async def verify_otp(response: Response, request: VerifyOtpRequest):
     """
     Επαληθεύει το OTP, δημιουργεί user και session, στέλνει cookie.
     """
-    logger.info(f"verify_otp called with skip_otp_verify={request.skip_otp_verify}")
+    print(f"verify_otp called with skip_otp_verify={request.skip_otp_verify}")
     try:
         async with get_db() as conn:
             # 1) Επαλήθευση OTP (skip for face registration)
@@ -807,7 +807,7 @@ async def verify_otp(response: Response, request: VerifyOtpRequest):
             path="/",
         )
 
-        logger.info(f"User {user_id} registered and session created")
+        print(f"User {user_id} registered and session created")
 
         return {
             "status": "success",
@@ -917,7 +917,7 @@ async def chat_with_company(
     # === TIMING START ===
     start_time = time.time()
     user_id = user_data["user_id"]
-    logger.info(f"🚀 Chat request from user_id: {user_id}")
+    print(f"🚀 Chat request from user_id: {user_id}")
 
     ### βρίσκει το chatbot του χρήστη ###
     chatbot_id = message_data.chatbot_id
@@ -959,7 +959,7 @@ async def chat_with_company(
         raise HTTPException(status_code=403, detail="Invalid API key")
 
     companyName = company_data["companyName"]
-    logger.info(f"✅ Chat request for company: {companyName}")
+    print(f"✅ Chat request for company: {companyName}")
 
     cached_data = get_cached_test_data(user_id, chatbot_id)
 
@@ -967,7 +967,7 @@ async def chat_with_company(
         # ✅ Cache HIT - χρησιμοποιούμε cached assistant_id
         assistant_id = cached_data["assistant_id"]
         existing_thread_id = cached_data.get("thread_id")
-        logger.info(f"✅ Cache HIT: Using cached assistant {assistant_id}")
+        print(f"✅ Cache HIT: Using cached assistant {assistant_id}")
 
     else:
         async with get_db() as conn:
@@ -986,16 +986,16 @@ async def chat_with_company(
 
         existing_thread_id = None
 
-    logger.info(f"🤖 Using assistant: {assistant_id}")
+    print(f"🤖 Using assistant: {assistant_id}")
 
     # Get or create thread
     thread_id = await get_or_create_thread(message_data.thread_id or existing_thread_id)
-    logger.info(f"💬 Thread ID: {thread_id}")
+    print(f"💬 Thread ID: {thread_id}")
 
     if not cached_data:
         # Πρώτο μήνυμα (cache MISS) - αποθηκεύουμε στο Redis
         cache_test_data(user_id, chatbot_id, assistant_id, thread_id)
-        logger.info(f"💾 Cached assistant & thread for future requests")
+        print(f"💾 Cached assistant & thread for future requests")
 
     # Add user message to thread
     await add_message_to_thread(
@@ -1007,7 +1007,7 @@ async def chat_with_company(
     async def stream_response():
         try:
             api_start_time = time.time()
-            logger.info("🔄 Starting Assistant API call...")
+            print("🔄 Starting Assistant API call...")
 
             chunks = []
             first_chunk_time = None
@@ -1016,7 +1016,7 @@ async def chat_with_company(
             async for content_chunk in run_assistant_on_thread(thread_id, assistant_id):
                 if first_chunk_time is None:
                     first_chunk_time = time.time()
-                    logger.info(
+                    print(
                         f"⚡ First chunk received: {first_chunk_time - api_start_time:.3f}s"
                     )
 
@@ -1028,12 +1028,12 @@ async def chat_with_company(
 
             yield "data: [DONE]\n\n"
             full_response = "".join(chunks)
-            logger.info(f"🏁 Response length: {len(full_response)} characters")
+            print(f"🏁 Response length: {len(full_response)} characters")
 
             total_time = time.time() - start_time
             streaming_time = time.time() - api_start_time
-            logger.info(f"🏁 Total request time: {total_time:.3f}s")
-            logger.info(f"🏁 OpenAI streaming time: {streaming_time:.3f}s")
+            print(f"🏁 Total request time: {total_time:.3f}s")
+            print(f"🏁 OpenAI streaming time: {streaming_time:.3f}s")
 
         except Exception as e:
             logger.error(f"❌ Stream error: {e}")
@@ -1103,13 +1103,13 @@ async def create_chatbot_unified(
         website_data = ""
         if company_info_obj.websiteURL:  # ← Έλεγχος αν υπάρχει URL
             try:
-                logger.info(f"🔄 Starting scraping for: {company_info_obj.websiteURL}")
+                print(f"🔄 Starting scraping for: {company_info_obj.websiteURL}")
                 scraper = ScrapingController()
                 scraped_data = await scraper.scrape_website_async(
                     str(company_info_obj.websiteURL)
                 )
 
-                logger.info(f"📝 Extracting plain text content...")
+                print(f"📝 Extracting plain text content...")
                 structured_content_parts = []
                 main_page_data = scraped_data.get("main_page", {})
                 main_url = main_page_data.get(
@@ -1233,7 +1233,7 @@ async def create_chatbot_unified(
         # This ensures files are indexed before the assistant starts using them
         if local_file_paths:
             try:
-                logger.info(
+                print(
                     f"🔄 Processing {len(local_file_paths)} files synchronously before assistant creation..."
                 )
                 file_processing_result = await to_thread.run_sync(
@@ -1247,7 +1247,7 @@ async def create_chatbot_unified(
                     (faq_text if (faq_text and faq_text.strip()) else None),
                 )
                 openai_file_ids = file_processing_result.get("openai_file_ids", {})
-                logger.info(f"✅ Files processed and indexed before assistant creation")
+                print(f"✅ Files processed and indexed before assistant creation")
 
             except Exception as e:
                 logger.warning(f"⚠️ File processing encountered an issue: {e}")
@@ -1346,7 +1346,7 @@ async def create_chatbot_unified(
                 file_ids=openai_file_ids,
             )
             await conn.commit()
-        logger.info(f"✅ Assistant config saved for company_id={company_id}")
+        print(f"✅ Assistant config saved for company_id={company_id}")
 
         # ====....=====#
 
@@ -1358,7 +1358,7 @@ async def create_chatbot_unified(
                     (user_id, api_key, company_id, now_utc()),
                 )
             await conn.commit()
-            logger.info(
+            print(
                 f"User {user_id} linked to chatbot api_key={api_key}, id={company_id}"
             )
 
@@ -1393,7 +1393,7 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
     Επιστρέφει όλα τα chatbots του συνδεδεμένου χρήστη
     """
     user_id = user_data["user_id"]
-    logger.info(
+    print(
         f"📊 [GET /user-chatbots] user_id from session: {user_id}, email: {user_data.get('email')}"
     )
 
@@ -1406,7 +1406,7 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
                     (user_data.get("auth_session_id"),),
                 )
                 session_rec = await cursor.fetchone()
-                logger.info(
+                print(
                     f"📍 [GET /user-chatbots] Session record verified: {dict(session_rec) if session_rec else 'NOT FOUND'}"
                 )
 
@@ -1424,7 +1424,7 @@ async def get_user_chatbots(user_data: dict = Depends(get_current_user)):
                     (user_id,),
                 )
                 chatbots = await cursor.fetchall()
-                logger.info(
+                print(
                     f"🤖 [GET /user-chatbots] Query result: {len(chatbots)} chatbots found for user_id={user_id}"
                 )
 
@@ -1486,9 +1486,7 @@ async def update_chatbot(
     rescrape: bool = Form(False),
     edited_website_data: str = Form(None),
 ):
-    logger.info(
-        f"Update request: user_id={user_data['user_id']}, chatbot_id={chatbot_id}"
-    )
+    print(f"Update request: user_id={user_data['user_id']}, chatbot_id={chatbot_id}")
     temp_files_to_cleanup = []
 
     # 1) Ownership check & Fetch existing data
@@ -1518,7 +1516,7 @@ async def update_chatbot(
     # 2) Parse input
     try:
         data = json.loads(company_info)
-        logger.info("Parsed company_info successfully")
+        print("Parsed company_info successfully")
     except json.JSONDecodeError as e:
         logger.error(f"Invalid company_info JSON: {e}")
         raise HTTPException(status_code=400, detail="Invalid company_info JSON")
@@ -1561,7 +1559,7 @@ async def update_chatbot(
 
     # If URL changed and there's a new URL, automatically trigger rescrape
     if url_changed and new_website_url and not rescrape:
-        logger.info(
+        print(
             f"🔄 Website URL changed from '{stored_website_url}' to '{new_website_url}' - auto-triggering rescrape"
         )
         rescrape = True
@@ -1571,14 +1569,14 @@ async def update_chatbot(
         website_url = str(data.get("websiteURL") or "").strip()
 
         if not website_url:
-            logger.info(
+            print(
                 "⚠️ Rescrape requested, but no website URL provided — skipping website scrape."
             )
             website_data_to_save = "no content"
         else:
 
             try:
-                logger.info(f"🔄 Re-scraping website: {data.get('websiteURL')}")
+                print(f"🔄 Re-scraping website: {data.get('websiteURL')}")
                 scraper = ScrapingController()
                 scraped_data = await scraper.scrape_website_async(
                     str(data.get("websiteURL"))
@@ -1634,7 +1632,7 @@ async def update_chatbot(
 
                 # 3) Συγχώνευση όλων των τμημάτων
                 website_data_to_save = "".join(structured_content_parts)
-                logger.info(
+                print(
                     f"✅ Re-scraped structured website data length: {len(website_data_to_save)} characters"
                 )
 
@@ -1656,12 +1654,12 @@ async def update_chatbot(
 
     elif edited_website_data:
         website_data_to_save = edited_website_data
-        logger.info(
+        print(
             f"✏️ Using edited website data, length: {len(website_data_to_save)} characters"
         )
     else:
         website_data_to_save = stored_website_data
-        logger.info(
+        print(
             f"📦 Keeping existing website data, length: {len(stored_website_data)} characters"
         )
 
@@ -1699,7 +1697,7 @@ async def update_chatbot(
                 await async_openai_client.beta.assistants.update(
                     assistant_id=row["assistant_id"], instructions=prompt_snapshot
                 )
-                logger.info(f"✅ Updated Assistant prompt")
+                print(f"✅ Updated Assistant prompt")
 
     updated_file_ids = None
 
@@ -1761,7 +1759,7 @@ async def update_chatbot(
         from AI_assistant_helper import update_vector_store_blocking
 
         try:
-            logger.info("🔄 Running blocking Vector Store update...")
+            print("🔄 Running blocking Vector Store update...")
 
             knowledge_result = await to_thread.run_sync(
                 update_vector_store_blocking,
@@ -1779,7 +1777,7 @@ async def update_chatbot(
             )
 
             updated_file_ids = knowledge_result["openai_file_ids"]
-            logger.info(f"✅ Vector Store {vector_store_id} updated successfully.")
+            print(f"✅ Vector Store {vector_store_id} updated successfully.")
 
             for temp_path in temp_files_to_cleanup:
                 try:
@@ -1799,7 +1797,7 @@ async def update_chatbot(
                         (json.dumps(updated_file_ids), chatbot_id),
                     )
                 await conn_update.commit()
-            logger.info("✅ Updated assistant_configs with new file IDs.")
+            print("✅ Updated assistant_configs with new file IDs.")
 
         except Exception as e:
             logger.error(f"❌ Knowledge processing failed during update: {e}")
@@ -1884,7 +1882,7 @@ async def update_chatbot(
     async with get_db() as conn:
         try:
             async with conn.cursor() as cursor:
-                logger.info(f"Executing UPDATE for chatbot_id={chatbot_id}")
+                print(f"Executing UPDATE for chatbot_id={chatbot_id}")
 
                 # Execute UPDATE
                 await cursor.execute(update_sql, tuple(params))
@@ -1896,7 +1894,7 @@ async def update_chatbot(
                     )
 
             await conn.commit()
-            logger.info(
+            print(
                 f"Successfully updated chatbot {chatbot_id}, rows affected: {cursor.rowcount}"
             )
 
@@ -1975,7 +1973,7 @@ async def get_chatbot_files(
         # 4. Sort by upload date (newest first)
         user_files.sort(key=lambda x: x.get("uploaded_at", ""), reverse=True)
 
-        logger.info(f"📋 Retrieved {len(user_files)} files for chatbot_id={chatbot_id}")
+        print(f"📋 Retrieved {len(user_files)} files for chatbot_id={chatbot_id}")
 
         return {"files": user_files, "total_files": len(user_files)}
 
@@ -1998,7 +1996,7 @@ async def delete_chatbot_file(
         chatbot_id: Το ID του chatbot
         filename: Το filename του file προς διαγραφή (όχι το file_id)
     """
-    logger.info(
+    print(
         f"🗑️ Delete file request: user_id={user_data['user_id']}, chatbot_id={chatbot_id}, filename={filename}"
     )
 
@@ -2067,7 +2065,7 @@ async def delete_chatbot_file(
                 )
             await conn.commit()
 
-        logger.info(f"✅ File '{filename}' deleted successfully")
+        print(f"✅ File '{filename}' deleted successfully")
 
         return {
             "status": "success",
@@ -2375,7 +2373,7 @@ async def cleanup_test_session_endpoint(
     try:
         user_id = user_data["user_id"]
         chatbot_id = data.chatbot_id
-        logger.info(f"🧹 Cleanup request: user={user_id}, chatbot={chatbot_id}")
+        print(f"🧹 Cleanup request: user={user_id}, chatbot={chatbot_id}")
 
         # OWNERSHIP VERIFICATION #
         async with get_db() as conn:
@@ -2401,9 +2399,7 @@ async def cleanup_test_session_endpoint(
         success = await cleanup_test_session(user_id, chatbot_id)
 
         if success:
-            logger.info(
-                f"✅ Cleanup successful for user {user_id}, chatbot {chatbot_id}"
-            )
+            print(f"✅ Cleanup successful for user {user_id}, chatbot {chatbot_id}")
             return {"status": "ok", "message": "Test session cleaned up"}
         else:
             logger.warning(f"⚠️ Cleanup failed for user {user_id}, chatbot {chatbot_id}")
