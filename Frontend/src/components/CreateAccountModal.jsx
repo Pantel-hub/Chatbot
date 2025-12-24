@@ -237,9 +237,9 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 	};
 
 	return (
-		<div className="w-full max-w-md mx-3 sm:mx-0">
-			<div className="rounded-xl sm:rounded-2xl overflow-hidden bg-white shadow-xl">
-				<div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-8 py-4 sm:py-6 relative rounded-t-xl sm:rounded-t-2xl">
+		<div className="w-full max-w-md mx-3 sm:mx-0 max-h-[90vh] flex flex-col">
+			<div className="rounded-xl sm:rounded-2xl overflow-hidden bg-white shadow-xl flex flex-col max-h-full">
+				<div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-8 py-4 sm:py-6 relative rounded-t-xl sm:rounded-t-2xl flex-shrink-0">
 				<button
 					onClick={onCancel}
 					className="absolute top-3 left-3 sm:top-4 sm:left-4 p-1.5 sm:p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200"
@@ -269,7 +269,7 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 					</p>
 				</div>
 
-				<form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-2">
+				<form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-2 overflow-y-auto flex-1">
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							{t("signup.firstName", "Όνομα")}
