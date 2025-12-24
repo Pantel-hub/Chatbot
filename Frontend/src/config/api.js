@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
 	verifyFace: `${BASE_URL}/api/face/verify`,
 	faceStatus: `${BASE_URL}/api/face/status`,
 	deleteFace: `${BASE_URL}/api/face/delete`,
+	checkFaceExists: `${BASE_URL}/api/face/check-exists`,
 };
 
 export { BASE_URL };
