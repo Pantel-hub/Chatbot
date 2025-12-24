@@ -305,3 +305,51 @@ async def face_status_endpoint(user_id: int = Depends(get_current_user)):
     except Exception as e:
         logger.error(f"Face status check error: {e}")
         raise HTTPException(status_code=500, detail="Failed to check face status")
+
+
+class FaceExistsResponse(BaseModel):
+    exists: bool
+    message: str
+
+
+@router.post("/check-exists", response_model=FaceExistsResponse)
+async def check_face_exists_endpoint(request: FaceImageRequest):
+    """
+    Check if a face is already registered in the system.
+    This endpoint does NOT require authentication - it's used during registration
+    to prevent duplicate face registrations BEFORE creating an account.
+
+    Request Body:
+    {
+        "image": "base64_encoded_image_string"
+    }
+
+    Returns:
+    {
+        "exists": true/false,
+        "message": "Human readable message"
+    }
+    """
+    try:
+        # Use find_matching_user to check if this face already exists
+        existing_user_id = await find_matching_user(request.image)
+
+        if existing_user_id is not None:
+            logger.warning(f"Face already exists for user_id: {existing_user_id}")
+            return {
+                "exists": True,
+                "message": "This face is already registered to another account. Please login to your existing account instead of creating a new one.",
+            }
+
+        return {
+            "exists": False,
+            "message": "Face is not registered yet.",
+        }
+
+    except ValueError as e:
+        # Face detection failed (no face found, etc.)
+        logger.warning(f"Face detection error during check: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Face existence check error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to check face existence")

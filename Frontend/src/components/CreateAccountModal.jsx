@@ -106,7 +106,28 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 			setIsLoading(true);
 			
 			try {
-			// First, register user with face authentication method
+			// STEP 1: Check if face already exists BEFORE creating account
+			console.log("Checking if face already exists...");
+			const checkRes = await fetch(API_ENDPOINTS.checkFaceExists, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ image: faceData }),
+			});
+			
+			const checkData = await checkRes.json();
+			console.log("Face check response:", checkData);
+			
+			if (!checkRes.ok) {
+				throw new Error(checkData.detail || "Failed to verify face");
+			}
+			
+			if (checkData.exists) {
+				// Face already exists - do NOT create account
+				throw new Error(checkData.message || "This face is already registered to another account. Please login instead.");
+			}
+			
+			// STEP 2: Face is unique - now create user with face authentication method
 			const tempEmail = `face_${Date.now()}@temp.local`;
 			
 			console.log("Registering user with face auth...");
@@ -140,7 +161,7 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 				throw new Error("No auth session ID returned");
 			}
 			
-			// Then register face with explicit authorization
+			// STEP 3: Register face with explicit authorization
 			console.log("Registering face embedding with session:", authSessionId);
 			const faceRes = await fetch(API_ENDPOINTS.registerFace, {
 				method: "POST",
