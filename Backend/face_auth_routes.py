@@ -28,6 +28,29 @@ router = APIRouter(prefix="/api/face", tags=["face-auth"])
 # Pydantic Models
 class FaceImageRequest(BaseModel):
     image: str  # Base64 encoded image
+    language: str = "el"  # Default to Greek, accepts "en" for English
+
+
+# Helper function for bilingual face detection error messages
+def get_face_error_message(error: str, language: str) -> str:
+    """Translate face detection errors to the appropriate language"""
+    error_lower = error.lower()
+    
+    # Check for common face detection errors
+    if "numpy array" in error_lower or "could not detect" in error_lower or "face" in error_lower:
+        if language == "en":
+            return "Could not detect any face, please try again."
+        else:
+            return "Δεν αναγνωρίστηκε κάποιο πρόσωπο, προσπαθήστε ξανά."
+    
+    if "not recognized" in error_lower or "no matching" in error_lower:
+        if language == "en":
+            return "Face not recognized. Please try again or use another login method."
+        else:
+            return "Το πρόσωπο δεν αναγνωρίστηκε. Δοκιμάστε ξανά ή χρησιμοποιήστε άλλη μέθοδο σύνδεσης."
+    
+    # Default: return original error
+    return error
 
 
 class FaceLoginResponse(BaseModel):
@@ -207,10 +230,12 @@ async def face_login_endpoint(response: Response, request: FaceImageRequest):
         raise
     except ValueError as e:
         logger.warning(f"Face login validation error: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        error_msg = get_face_error_message(str(e), request.language)
+        raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         logger.error(f"Face login error: {e}")
-        raise HTTPException(status_code=500, detail="Login failed")
+        error_msg = get_face_error_message(str(e), request.language)
+        raise HTTPException(status_code=500, detail=error_msg)
 
 
 @router.post("/verify", response_model=FaceVerifyResponse)
@@ -349,7 +374,9 @@ async def check_face_exists_endpoint(request: FaceImageRequest):
     except ValueError as e:
         # Face detection failed (no face found, etc.)
         logger.warning(f"Face detection error during check: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        error_msg = get_face_error_message(str(e), request.language)
+        raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         logger.error(f"Face existence check error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to check face existence")
+        error_msg = get_face_error_message(str(e), request.language)
+        raise HTTPException(status_code=500, detail=error_msg)

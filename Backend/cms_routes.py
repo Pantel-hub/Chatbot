@@ -490,6 +490,7 @@ companies_db: Dict[str, CompanyInfo] = {}
 
 class SendLoginOtpRequest(BaseModel):
     contact: str
+    language: str = "el"  # Default to Greek, accepts "en" for English
 
 
 class VerifyOtpRequest(BaseModel):
@@ -561,9 +562,14 @@ async def send_login_otp(request: SendLoginOtpRequest):
                 await cursor.execute(query, params)
                 user = await cursor.fetchone()
                 if not user:
+                    error_msg = (
+                        "No user was found with this contact information."
+                        if request.language == "en"
+                        else "Δεν βρέθηκε χρήστης με αυτό το στοιχείο επικοινωνίας"
+                    )
                     raise HTTPException(
                         status_code=404,
-                        detail="Δεν βρέθηκε χρήστης με αυτό το στοιχείο επικοινωνίας",
+                        detail=error_msg,
                     )
                 if user["email"] == request.contact:
                     method = "email"
@@ -577,9 +583,14 @@ async def send_login_otp(request: SendLoginOtpRequest):
         from auth import send_otp_to_contact
 
         send_otp_to_contact(verification, otp_code, method, purpose="login")
+        success_msg = (
+            "OTP code sent"
+            if request.language == "en"
+            else "Κωδικός OTP στάλθηκε"
+        )
         return {
             "status": "success",
-            "message": "Κωδικός OTP στάλθηκε",
+            "message": success_msg,
             "contact": verification,
         }
     except HTTPException:
@@ -693,7 +704,7 @@ async def send_otp(request: SendOtpRequest):
                     if request.language == "en":
                         raise HTTPException(
                             status_code=400,
-                            detail="This user already exists, login here",
+                            detail="Contact information is already registered, log in here",
                         )
                     else:
                         raise HTTPException(
