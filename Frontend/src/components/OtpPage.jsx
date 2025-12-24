@@ -11,8 +11,9 @@ import FaceCapture from "./FaceCapture";
  * Props:
  * - onSubmit: function() -> καλείται όταν γίνει επιτυχής σύνδεση
  * - onResend: optional function() -> καλείται όταν γίνεται resend OTP
+ * - asModal: boolean -> when true, removes full-page background styling
  */
-export default function OtpPage({ onSubmit, onResend, onCancel }) {
+export default function OtpPage({ onSubmit, onResend, onCancel, asModal = false }) {
 	const { t, i18n } = useTranslation();
 
 	const [contact, setContact] = useState("");
@@ -138,7 +139,7 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 flex items-center justify-center px-4">
+		<div className={asModal ? "w-full max-w-md mx-auto" : "min-h-screen bg-gradient-to-b from-white to-zinc-50 flex items-center justify-center px-4"}>
 			<div className="w-full max-w-md rounded-2xl overflow-hidden bg-white shadow-xl border border-gray-100">
 				{/* Header */}
 				<div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 relative">

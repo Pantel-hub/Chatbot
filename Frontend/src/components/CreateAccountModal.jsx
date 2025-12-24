@@ -5,6 +5,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { API_ENDPOINTS } from "../config/api";
 import FaceCapture from "./FaceCapture";
+import OtpPage from "./OtpPage";
 
 export default function CreateAccountModal({ onSuccess, onCancel }) {
 	const { t, i18n } = useTranslation();
@@ -17,6 +18,7 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 	const [otp, setOtp] = useState("");
 	const [faceData, setFaceData] = useState(null);
 	const [showFaceCapture, setShowFaceCapture] = useState(false);
+	const [showLoginModal, setShowLoginModal] = useState(false);
 
 	const [otpSent, setOtpSent] = useState(false);
 	const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -235,6 +237,20 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 			setIsLoading(false);
 		}
 	};
+
+	// If login modal is shown, only render the login modal
+	if (showLoginModal) {
+		return (
+			<OtpPage
+				onSubmit={() => {
+					setShowLoginModal(false);
+					onSuccess?.({ method: "login" });
+				}}
+				onCancel={() => setShowLoginModal(false)}
+				asModal={true}
+			/>
+		);
+	}
 
 	return (
 		<div className="w-full max-w-md mx-3 sm:mx-0 max-h-[90vh] flex flex-col">
@@ -520,6 +536,33 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 							</div>
 						</div>
 					)}
+
+					{/* Already have an account link */}
+					<div className="text-center text-sm text-gray-600 py-2">
+						{i18n.language === "en" ? (
+							<>
+								If you already have an account,{" "}
+								<button
+									type="button"
+									onClick={() => setShowLoginModal(true)}
+									className="text-indigo-600 hover:text-indigo-800 font-medium underline"
+								>
+									click here
+								</button>
+							</>
+						) : (
+							<>
+								Αν έχεις ήδη λογαριασμό,{" "}
+								<button
+									type="button"
+									onClick={() => setShowLoginModal(true)}
+									className="text-indigo-600 hover:text-indigo-800 font-medium underline"
+								>
+									πάτα εδώ
+								</button>
+							</>
+						)}
+					</div>
 
 					{error && (
 						<div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
