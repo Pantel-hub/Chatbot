@@ -3,38 +3,15 @@
 @tailwind utilities;
 
 /* Page Transition Animations */
-.page-transition {
-	animation-duration: 0.3s;
-	animation-fill-mode: both;
-	animation-timing-function: ease-in-out;
-}
-
 .page-transition.fadeIn {
-	animation-name: fadeIn;
-}
-
-.page-transition.fadeOut {
-	animation-name: fadeOut;
+	animation: fadeIn 0.5s ease-out;
 }
 
 @keyframes fadeIn {
 	from {
 		opacity: 0;
-		transform: translateY(20px);
 	}
 	to {
 		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-@keyframes fadeOut {
-	from {
-		opacity: 1;
-		transform: translateY(0);
-	}
-	to {
-		opacity: 0;
-		transform: translateY(-20px);
 	}
 }
