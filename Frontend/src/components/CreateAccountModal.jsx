@@ -72,6 +72,7 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 					contact:
 						verificationMethod === "email" ? email : "+" + phone,
 					method: verificationMethod,
+					language: i18n.language,
 				}),
 			});
 
@@ -112,7 +113,7 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify({ image: faceData }),
+				body: JSON.stringify({ image: faceData, language: i18n.language }),
 			});
 			
 			const checkData = await checkRes.json();

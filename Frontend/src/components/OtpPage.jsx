@@ -77,7 +77,7 @@ export default function OtpPage({ onSubmit, onResend, onCancel }) {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify({ image: imageData }),
+				body: JSON.stringify({ image: imageData, language: i18n.language }),
 			});
 
 			const data = await res.json();
