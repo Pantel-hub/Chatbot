@@ -17,6 +17,7 @@ import { API_ENDPOINTS } from "./config/api";
 export default function App() {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const controllersRef = React.useRef(new Set());
 
 	// --- State ---
@@ -48,6 +49,28 @@ export default function App() {
 	// Παίρνει τις μεταφράσεις των βημάτων
 	const stepLabels = t("steps", { returnObjects: true }) || {};
 	const steps = Object.values(stepLabels);
+
+	// Cleanup form state when navigating away from create/edit routes
+	useEffect(() => {
+		const isFormRoute = location.pathname === "/create-bot" || location.pathname.startsWith("/edit-bot");
+		
+		// If user leaves form route without completing, reset progress
+		if (!isFormRoute && !formSubmitted) {
+			setCurrentPage(0);
+			setMaxVisitedPage(0);
+			// Also reset form data when leaving
+			if (!editingChatbot && !apiKey) {
+				setFormData({});
+			}
+		}
+		
+		// Reset form when going to create-bot route from anywhere
+		if (location.pathname === "/create-bot" && !editingChatbot) {
+			setFormData({});
+			setApiKey(null);
+			setWidgetScript(null);
+		}
+	}, [location.pathname, formSubmitted, editingChatbot, apiKey]);
 
 	//όταν φορτώνει η σελίδα κάνει fetch στο endpoint checksession
 	useEffect(() => {
@@ -83,7 +106,10 @@ export default function App() {
 	};
 
 	const handlePrev = () => {
-		if (currentPage > 0) setCurrentPage(currentPage - 1);
+		if (currentPage > 0) {
+			setCurrentPage(currentPage - 1);
+			// Don't reduce maxVisitedPage - keep progress unlocked
+		}
 	};
 
 	const handleGoToPage = (pageIndex) => {
