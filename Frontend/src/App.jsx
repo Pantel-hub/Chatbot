@@ -1,6 +1,6 @@
 // App.jsx
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import FormSteps from "./FormSteps";
 import SidebarPreview from "./components/SidebarPreview";
@@ -11,6 +11,7 @@ import Pricing from "./components/Pricing";
 import Contact from "./components/Contact";
 import OtpPage from "./components/OtpPage";
 import Dashboard from "./components/Dashboard";
+import PageTransition from "./components/PageTransition";
 import { API_ENDPOINTS } from "./config/api";
 
 export default function App() {
@@ -348,9 +349,10 @@ export default function App() {
 
 	return (
 		<div className="min-h-screen font-sans">
-			<Routes>
-				{/* Public Routes */}
-				<Route
+			<PageTransition>
+				<Routes>
+					{/* Public Routes */}
+					<Route
 					path="/"
 					element={
 						isLoggedIn ? (
@@ -493,6 +495,7 @@ export default function App() {
 				{/* Catch all - redirect to home */}
 				<Route path="*" element={<Navigate to="/" replace />} />
 			</Routes>
+			</PageTransition>
 		</div>
 	);
 }
