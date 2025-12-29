@@ -179,9 +179,15 @@ export default function Dashboard({
 		);
 	};
 
+	const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
 	const handleDelete = async (id) => {
-		if (!confirm("Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το bot;"))
-			return;
+		setConfirmDeleteId(id);
+	};
+
+	const confirmDelete = async () => {
+		const id = confirmDeleteId;
+		setConfirmDeleteId(null);
 
 		try {
 			console.log("[Dashboard] 🗑️ Διαγραφή bot:", id);
@@ -213,7 +219,7 @@ export default function Dashboard({
 			console.log("[Dashboard] ✅ Διαγράφηκε:", id);
 		} catch (err) {
 			console.error("[Dashboard] ❌ Αποτυχία διαγραφής:", err);
-			alert("Η διαγραφή απέτυχε. Προσπαθήστε ξανά.");
+			alert(t("bots.deleteError", "Η διαγραφή απέτυχε. Προσπαθήστε ξανά."));
 		} finally {
 			setDeletingId(null);
 		}
@@ -221,7 +227,7 @@ export default function Dashboard({
 
 	const handleRename = async () => {
 		if (!newBotName.trim()) {
-			alert("Το όνομα του bot δεν μπορεί να είναι άδειο");
+			alert(t("bots.emptyNameError", "Το όνομα του bot δεν μπορεί να είναι άδειο"));
 			return;
 		}
 
@@ -252,10 +258,10 @@ export default function Dashboard({
 			setRenamingBotId(null);
 			setNewBotName("");
 			setOpenMenuId(null);
-			alert("Το bot μετονομάστηκε με επιτυχία!");
+			alert(t("bots.renameSuccess", "Το bot μετονομάστηκε με επιτυχία!"));
 		} catch (err) {
 			console.error("[Dashboard] ❌ Αποτυχία μετονομασίας:", err);
-			alert("Η μετονομασία απέτυχε. Προσπαθήστε ξανά.");
+			alert(t("bots.renameError", "Η μετονομασία απέτυχε. Προσπαθήστε ξανά."));
 		} finally {
 			setRenaming(false);
 		}
@@ -702,6 +708,63 @@ export default function Dashboard({
 								? t("saving", "Saving...")
 								: t("save", "Save")}
 						</button>
+					</div>
+				</div>
+			</div>
+		)}
+
+		{/* Delete Confirmation Modal */}
+		{confirmDeleteId && (
+			<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+				<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-up">
+					<div className="bg-gradient-to-r from-rose-600 to-red-600 px-6 py-4">
+						<div className="flex items-center gap-3">
+							<div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+								<svg
+									className="h-6 w-6 text-white"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2}
+										d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+									/>
+								</svg>
+							</div>
+							<div>
+								<h3 className="text-xl font-bold text-white">
+									{t("bots.confirmDelete", "Confirm Delete")}
+								</h3>
+								<p className="text-rose-100 text-sm">
+									{t("bots.confirmDeleteSubtitle", "This action cannot be undone")}
+								</p>
+							</div>
+						</div>
+					</div>
+					<div className="p-6">
+						<p className="text-gray-700 text-base mb-6">
+							{t(
+								"bots.confirmDeleteMessage",
+								"Are you sure you want to delete this bot? All data, conversations, and settings will be permanently removed."
+							)}
+						</p>
+						<div className="flex gap-3">
+							<button
+								onClick={() => setConfirmDeleteId(null)}
+								className="flex-1 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+							>
+								{t("cancel", "Cancel")}
+							</button>
+							<button
+								onClick={confirmDelete}
+								className="flex-1 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-rose-600 to-red-600 rounded-lg hover:from-rose-700 hover:to-red-700 transition-all shadow-lg hover:shadow-xl"
+							>
+								{t("bots.delete", "Delete")}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>

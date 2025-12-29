@@ -200,7 +200,14 @@
     "rename": "Rename",
     "renameTitle": "Rename Bot",
     "newName": "New Bot Name",
-    "namePlaceholder": "Enter new bot name..."
+    "namePlaceholder": "Enter new bot name...",
+    "deleteError": "Delete failed. Please try again.",
+    "emptyNameError": "Bot name cannot be empty",
+    "renameSuccess": "Bot renamed successfully!",
+    "renameError": "Rename failed. Please try again.",
+    "confirmDelete": "Confirm Delete",
+    "confirmDeleteSubtitle": "This action cannot be undone",
+    "confirmDeleteMessage": "Are you sure you want to delete this bot? All data, conversations, and settings will be permanently removed."
   },
   "saving": "Saving...",
   "save": "Save",  "analytics": {

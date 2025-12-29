@@ -153,13 +153,13 @@ export default function Deploy({
 		]
 	);
 
+	const widgetUrl = BASE_URL 
+		? `${BASE_URL}/api/public/widget.js?key=${apiKey}`
+		: `http://localhost:8000/api/public/widget.js?key=${apiKey}`;
+	
 	const scriptSnippet =
 		widgetScript ||
-		`<script>\n  window.__chatbotConfig = ${JSON.stringify(
-			configObj,
-			null,
-			2
-		)};\n</script>\n<script src="https://cdn.example.com/chat-widget.min.js" defer></script>`;
+		`<script src="${widgetUrl}"></script>`;
 
 	const checklist = [
 		"Σωστή επιλογή χρώματος/θέματος",
