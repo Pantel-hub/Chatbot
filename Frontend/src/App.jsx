@@ -702,9 +702,19 @@ function FormPageWrapper({
 			{showOtpModal && (
 				<div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
 					<CreateAccountModal
-						onSuccess={async () => {
+						onSuccess={async (data) => {
 							setShowOtpModal(false);
-							await performRealSubmit(pendingFormData);
+							setIsLoggedIn(true); // Update login state for both registration AND login
+							
+							if (data?.isLogin) {
+								// User logged in (already had account) - redirect to dashboard
+								console.log('[Auth] ✅ User logged in - redirecting to dashboard');
+								navigate('/dashboard');
+							} else {
+								// User just registered - continue with bot creation
+								console.log('[Auth] ✅ User registered - continuing bot creation');
+								await performRealSubmit(pendingFormData);
+							}
 						}}
 						onCancel={() => setShowOtpModal(false)}
 					/>

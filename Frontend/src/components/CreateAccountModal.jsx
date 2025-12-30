@@ -244,7 +244,8 @@ export default function CreateAccountModal({ onSuccess, onCancel }) {
 			<OtpPage
 				onSubmit={() => {
 					setShowLoginModal(false);
-					onSuccess?.({ method: "login" });
+					// Pass isLogin flag to indicate this is a login, not registration
+					onSuccess?.({ method: "login", isLogin: true });
 				}}
 				onCancel={() => setShowLoginModal(false)}
 				asModal={true}
