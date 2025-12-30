@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Rocket, Shield, Sparkles, ArrowRight, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import chatbotLandingSvg from "../assets/chatbot_landing.svg";
-import chatbotLogo from "../assets/chatbot_logo.svg";
+import chatbotLogo from "../assets/tab_logo.png";
 import conferenceLogo from "../assets/conferience_logo.png";
 import FeaturesPage from "./FeaturesPage";
 
@@ -37,7 +37,7 @@ export default function LandingPage({
 							<img
 								src={chatbotLogo}
 								alt="Chatbot Logo"
-								className="h-7 w-7 sm:h-9 sm:w-9"
+							className="h-12 w-15 sm:h-12 sm:w-15"
 							/>
 							<span className="text-base sm:text-lg font-bold tracking-tight">
 								{t("landing.brand", "Katinabot")}

@@ -86,6 +86,7 @@ export default function Dashboard({
 	const [renamingBotId, setRenamingBotId] = useState(null);
 	const [newBotName, setNewBotName] = useState("");
 	const [renaming, setRenaming] = useState(false);
+	const [alertModal, setAlertModal] = useState({ show: false, type: '', message: '' });
 
 	useEffect(() => {
 		fetchUserBots();
@@ -227,7 +228,11 @@ export default function Dashboard({
 
 	const handleRename = async () => {
 		if (!newBotName.trim()) {
-			alert(t("bots.emptyNameError", "Το όνομα του bot δεν μπορεί να είναι άδειο"));
+			setAlertModal({ 
+				show: true, 
+				type: 'error', 
+				message: t("bots.emptyNameError", "Το όνομα του bot δεν μπορεί να είναι άδειο") 
+			});
 			return;
 		}
 
@@ -258,10 +263,18 @@ export default function Dashboard({
 			setRenamingBotId(null);
 			setNewBotName("");
 			setOpenMenuId(null);
-			alert(t("bots.renameSuccess", "Το bot μετονομάστηκε με επιτυχία!"));
+			setAlertModal({ 
+				show: true, 
+				type: 'success', 
+				message: t("bots.renameSuccess", "Το bot μετονομάστηκε με επιτυχία!") 
+			});
 		} catch (err) {
 			console.error("[Dashboard] ❌ Αποτυχία μετονομασίας:", err);
-			alert(t("bots.renameError", "Η μετονομασία απέτυχε. Προσπαθήστε ξανά."));
+			setAlertModal({ 
+				show: true, 
+				type: 'error', 
+				message: t("bots.renameError", "Η μετονομασία απέτυχε. Προσπαθήστε ξανά.") 
+			});
 		} finally {
 			setRenaming(false);
 		}
@@ -765,6 +778,56 @@ export default function Dashboard({
 								{t("bots.delete", "Delete")}
 							</button>
 						</div>
+					</div>
+				</div>
+			</div>
+		)}
+
+		{/* Alert Modal */}
+		{alertModal.show && (
+			<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[101] p-4">
+				<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-up">
+					<div className={`px-6 py-4 ${
+						alertModal.type === 'success' 
+							? 'bg-gradient-to-r from-green-600 to-emerald-600' 
+							: 'bg-gradient-to-r from-rose-600 to-red-600'
+					}`}>
+						<div className="flex items-center gap-3">
+							<div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+								{alertModal.type === 'success' ? (
+									<svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+									</svg>
+								) : (
+									<svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+									</svg>
+								)}
+							</div>
+							<div>
+								<h3 className="text-xl font-bold text-white">
+									{alertModal.type === 'success' 
+										? t("success", "Success") 
+										: t("error", "Error")
+									}
+								</h3>
+							</div>
+						</div>
+					</div>
+					<div className="p-6">
+						<p className="text-gray-700 text-base mb-6">
+							{alertModal.message}
+						</p>
+						<button
+							onClick={() => setAlertModal({ show: false, type: '', message: '' })}
+							className={`w-full px-4 py-3 text-sm font-semibold text-white rounded-lg transition-all shadow-lg hover:shadow-xl ${
+								alertModal.type === 'success'
+									? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+									: 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700'
+							}`}
+						>
+							{t("ok", "OK")}
+						</button>
 					</div>
 				</div>
 			</div>

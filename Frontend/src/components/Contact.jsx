@@ -1,6 +1,6 @@
 import React from "react";
 import { ArrowLeft, Mail, Phone, MapPin } from "lucide-react";
-import chatbotLogo from "../assets/chatbot_logo.svg";
+import chatbotLogo from "../assets/tab_logo.png";
 import { useTranslation } from "react-i18next";
 
 export default function Contact({ onBack }) {
