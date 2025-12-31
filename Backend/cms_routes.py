@@ -1195,21 +1195,34 @@ async def create_chatbot_unified(
         temp_files_to_cleanup = []  # λίστα για να ξέρω ποια temp files να διαγράψεις
 
         # Save uploaded files to temp directory for background processing
+        logger.info(f"📁 Processing {len(files)} uploaded files...")
         for file in files:
-            temp_file = NamedTemporaryFile(delete=False, suffix=f"_{file.filename}")
-            await file.seek(0)
-            content = await file.read()
-            temp_file.write(content)
-            temp_file.close()
+            try:
+                temp_file = NamedTemporaryFile(delete=False, suffix=f"_{file.filename}")
+                await file.seek(0)
+                content = await file.read()
+                file_size_mb = len(content) / (1024 * 1024)
+                logger.info(f"📄 File: {file.filename}, Size: {file_size_mb:.2f}MB")
+                
+                if len(content) == 0:
+                    logger.warning(f"⚠️ File {file.filename} is empty, skipping")
+                    continue
+                    
+                temp_file.write(content)
+                temp_file.close()
 
-            local_file_paths.append(
-                {
-                    "path": temp_file.name,
-                    "type": "user_file",
-                    "filename_key": file.filename,
-                }
-            )
-            temp_files_to_cleanup.append(temp_file.name)
+                local_file_paths.append(
+                    {
+                        "path": temp_file.name,
+                        "type": "user_file",
+                        "filename_key": file.filename,
+                    }
+                )
+                temp_files_to_cleanup.append(temp_file.name)
+                logger.info(f"✅ File {file.filename} saved to temp: {temp_file.name}")
+            except Exception as e:
+                logger.error(f"❌ Error processing file {file.filename}: {e}")
+                continue
 
         # Save FAQ to temp file if present
         if faq_text and faq_text.strip():
@@ -1535,6 +1548,8 @@ async def update_chatbot(
     try:
         data = json.loads(company_info)
         print("Parsed company_info successfully")
+        print(f"🔍 coreFeatures received: {data.get('coreFeatures')}")
+        print(f"🔍 appointmentSettings received: {data.get('appointmentSettings')}")
     except json.JSONDecodeError as e:
         logger.error(f"Invalid company_info JSON: {e}")
         raise HTTPException(status_code=400, detail="Invalid company_info JSON")
@@ -1756,22 +1771,35 @@ async def update_chatbot(
 
         # 9.3) Προετοιμασία Local Files για Upload (αρχεία χρήστη)
         if files:
+            logger.info(f"📁 Processing {len(files)} uploaded files for update...")
             for file in files:
-                # Δημιουργία προσωρινού αρχείου (Χρησιμοποιούμε tempfile)
-                temp_file = NamedTemporaryFile(delete=False, suffix=f"_{file.filename}")
-                await file.seek(0)
-                content = await file.read()
-                temp_file.write(content)
-                temp_file.close()
+                try:
+                    # Δημιουργία προσωρινού αρχείου (Χρησιμοποιούμε tempfile)
+                    temp_file = NamedTemporaryFile(delete=False, suffix=f"_{file.filename}")
+                    await file.seek(0)
+                    content = await file.read()
+                    file_size_mb = len(content) / (1024 * 1024)
+                    logger.info(f"📄 File: {file.filename}, Size: {file_size_mb:.2f}MB")
+                    
+                    if len(content) == 0:
+                        logger.warning(f"⚠️ File {file.filename} is empty, skipping")
+                        continue
+                        
+                    temp_file.write(content)
+                    temp_file.close()
 
-                local_file_paths.append(
-                    {
-                        "path": temp_file.name,
-                        "type": "user_file",
-                        "filename_key": file.filename,
-                    }
-                )
-                temp_files_to_cleanup.append(temp_file.name)  # Προσθήκη για cleanup
+                    local_file_paths.append(
+                        {
+                            "path": temp_file.name,
+                            "type": "user_file",
+                            "filename_key": file.filename,
+                        }
+                    )
+                    temp_files_to_cleanup.append(temp_file.name)  # Προσθήκη για cleanup
+                    logger.info(f"✅ File {file.filename} saved to temp: {temp_file.name}")
+                except Exception as e:
+                    logger.error(f"❌ Error processing file {file.filename}: {e}")
+                    continue
 
         # 9.4) Εκτέλεση Blocking Update
         from AI_assistant_helper import update_vector_store_blocking

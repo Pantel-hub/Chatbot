@@ -10,8 +10,8 @@ import time
 
 logger = logging.getLogger(__name__)
 
-# Configuration
-MAX_FILE_SIZE = 1 * 1024 * 1024  # 1MB
+# Configuration - Increased from 1MB to 20MB for PDFs
+MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
 
 def extract_text_from_file_content(file_content: bytes, filename: str) -> str:

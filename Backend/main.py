@@ -38,6 +38,14 @@ ALLOWED_CMS_ORIGINS = {
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+
+    # Production Server (IP & Domain)
+    "https://katinabot.com",
+    "http://4.178.54.58:3000",
+    "http://4.178.54.58",
+    
+    # Το site του πελάτη (GitHub Pages)
+    "https://pantel-hub.github.io",
 }
 
 PUBLIC_METHODS = {"GET", "POST", "OPTIONS"}
