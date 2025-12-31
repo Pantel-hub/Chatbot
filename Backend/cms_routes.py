@@ -1535,6 +1535,8 @@ async def update_chatbot(
     try:
         data = json.loads(company_info)
         print("Parsed company_info successfully")
+        print(f"🔍 coreFeatures received: {data.get('coreFeatures')}")
+        print(f"🔍 appointmentSettings received: {data.get('appointmentSettings')}")
     except json.JSONDecodeError as e:
         logger.error(f"Invalid company_info JSON: {e}")
         raise HTTPException(status_code=400, detail="Invalid company_info JSON")
