@@ -85,10 +85,19 @@ export default function FormSteps({
 	const [isRescraping, setIsRescraping] = useState(false);
 	const [existingFiles, setExistingFiles] = useState([]); // [{ filename, uploaded_at }]
 
-	// Auto-fill effect
-	// Auto-fill effect
+	// Track which chatbot ID has been loaded to prevent duplicate fetches
+	const loadedChatbotIdRef = useRef(null);
+
+	// Auto-fill effect - only applies when manually selecting a preset in CREATE mode
 	useEffect(() => {
+		// Skip auto-fill completely in edit mode
+		if (editMode) {
+			console.log("[FormSteps.jsx] ⏭️ Auto-fill skipped (edit mode)");
+			return;
+		}
+		
 		if (formData.botTypePreset) {
+			console.log("[FormSteps.jsx] 🔄 Auto-fill triggered for preset:", formData.botTypePreset);
 			setFormData((prev) => ({
 				...prev,
 				botName: t(`botTypeDefaults.${formData.botTypePreset}.botName`),
@@ -100,7 +109,9 @@ export default function FormSteps({
 					{ lng: "en" }
 				),
 			}));
-		} else if (formData.botTypePreset === "") {
+		} else if (formData.botTypePreset === "" && !editMode) {
+			// Only reset when not in edit mode
+			console.log("[FormSteps.jsx] 🔄 Auto-fill reset (empty preset, create mode)");
 			setFormData((prev) => ({
 				...prev,
 				botName: "",
@@ -108,19 +119,24 @@ export default function FormSteps({
 				personaSelect: "",
 			}));
 		}
-	}, [formData.botTypePreset, t]);
+	}, [formData.botTypePreset, t, editMode]);
 
-	// Edit mode: Fetch chatbot data , ελέγχει αν είναι σε edit mode και καλει την fetchchatbotdata
+	// Edit mode: Fetch chatbot data
 	useEffect(() => {
-		if (editMode?.chatbot_id) {
-			console.log(
-				"%c[FormSteps.jsx] ✏️ Edit mode detected",
-				"color:purple; font-weight:bold;"
-			);
-			console.log("Fetching chatbot data for ID:", editMode.chatbot_id);
-			fetchChatbotData(editMode.chatbot_id);
+		const chatbotId = editMode?.chatbot_id;
+		
+		// Reset ref if editMode is cleared (user went to dashboard or created new bot)
+		if (!editMode) {
+			loadedChatbotIdRef.current = null;
+			return;
 		}
-	}, [editMode]);
+		
+		if (chatbotId && loadedChatbotIdRef.current !== chatbotId) {
+			loadedChatbotIdRef.current = chatbotId;
+			console.log("[FormSteps.jsx] 📥 Fetching chatbot data for ID:", chatbotId);
+			fetchChatbotData(chatbotId);
+		}
+	}, [editMode?.chatbot_id, editMode]);
 
 	// Edit mode: Load existing files list
 	useEffect(() => {
@@ -181,13 +197,10 @@ export default function FormSteps({
 		[editMode?.chatbot_id, setExistingFiles]
 	);
 
-	//request στο endpoint getchatbot παίρνει τα στοιχεία της εταιρίας από την βάση
+	// Fetch chatbot data for edit mode
 	const fetchChatbotData = async (chatbotId) => {
 		try {
-			console.log(
-				"%c[FormSteps.jsx] 🌐 Fetching chatbot data...",
-				"color:blue; font-weight:bold;"
-			);
+			console.log("[FormSteps.jsx] 🌐 Fetching chatbot data for ID:", chatbotId);
 			const res = await fetch(`${API_ENDPOINTS.getChatbot(chatbotId)}`, {
 				credentials: "include",
 			});
@@ -197,24 +210,21 @@ export default function FormSteps({
 			}
 
 			const bot = await res.json();
-			console.log(
-				"%c[FormSteps.jsx] ✅ Chatbot data loaded",
-				"color:green; font-weight:bold;",
-				bot
-			);
+			console.log("[FormSteps.jsx] ✅ Chatbot data loaded:", bot);
+			console.log("[FormSteps.jsx] 📍 websiteURL from API:", bot.websiteURL);
 
-			setApiKey(bot.api_key);
-			setWidgetScript(bot.script);
+			// Set API key
+			const botApiKey = bot.api_key || "";
+			setApiKey(botApiKey);
+			
+			// Build widget script
+			const widgetScriptValue = bot.script || (botApiKey ? `<script src="${BASE_URL}/api/public/widget.js?key=${botApiKey}"></script>` : "");
+			setWidgetScript(widgetScriptValue);
 
 			setEditWebsiteData(bot.website_data || "");
-			console.log(
-				"%c[FormSteps.jsx] 📝 Loaded website data for editing",
-				"color:blue; font-weight:bold;",
-				`Length: ${(bot.website_data || "").length} characters`
-			);
 
 			// Pre-fill formData with existing values
-			setFormData({
+			const newFormData = {
 				botName: bot.botName || "",
 				greeting: bot.greeting || "",
 				botRestrictions: bot.botRestrictions || "",
@@ -234,17 +244,12 @@ export default function FormSteps({
 				defaultFailResponse: bot.defaultFailResponse || "",
 				botTypePreset: bot.botTypePreset || "",
 				files_data: bot.files_data || "",
-
-				// ← ΠΡΟΣΘΗΚΗ αυτών
 				coreFeatures: bot.coreFeatures || {},
 				leadCaptureFields: bot.leadCaptureFields || {},
-
 				appointmentSettings: bot.appointment_settings
 					? {
 							...bot.appointment_settings,
-							timeZone:
-								bot.appointment_settings.timeZone ||
-								"Europe/Athens",
+							timeZone: bot.appointment_settings.timeZone || "Europe/Athens",
 					  }
 					: {
 							slotDuration: 30,
@@ -253,12 +258,13 @@ export default function FormSteps({
 							workDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
 							timeZone: "Europe/Athens",
 					  },
-			});
+			};
+			
+			console.log("[FormSteps.jsx] 📝 Setting formData to:", newFormData);
+			setFormData(newFormData);
 
 			// Parse FAQ data
-			// Parse FAQ data
 			if (bot.faq_data) {
-				// Το backend ήδη έκανε parse, οπότε το faq_data είναι array
 				const faqParsed = Array.isArray(bot.faq_data)
 					? bot.faq_data
 					: JSON.parse(bot.faq_data);
@@ -272,6 +278,7 @@ export default function FormSteps({
 			
 		} catch (error) {
 			console.error("Error fetching chatbot:", error);
+			loadedChatbotIdRef.current = null;
 			alert("Failed to load chatbot data");
 		}
 	};
@@ -329,6 +336,10 @@ export default function FormSteps({
 
 	const handleSubmit = async (e) => {
 		if (e) e.preventDefault();
+		console.log("[FormSteps.jsx] 🚀 handleSubmit called");
+		console.log("[FormSteps.jsx] editMode:", editMode);
+		console.log("[FormSteps.jsx] Current formData:", formData);
+		
 		setIsSubmitting(true);
 		try {
 			const files = selectedFiles;
@@ -377,7 +388,12 @@ export default function FormSteps({
 				console.log(key, value);
 			}
 
+			console.log("[FormSteps.jsx] 📤 Calling onFormSubmit...");
 			await onFormSubmit(formDataToSend);
+			console.log("[FormSteps.jsx] ✅ onFormSubmit completed");
+		} catch (error) {
+			console.error("[FormSteps.jsx] ❌ Error in handleSubmit:", error);
+			alert("Error submitting form: " + error.message);
 		} finally {
 			setTimeout(() => setIsSubmitting(false), 400);
 		}
