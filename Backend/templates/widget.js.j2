@@ -489,6 +489,7 @@
     let isOpen = false;
     let messageHistory = [];
     let isLoading = false;
+    let userScrolledUp = false; // Track if user has scrolled up during bot response
 
     // ------------------------------------------------------------------------
     // DOM ELEMENTS
@@ -522,6 +523,32 @@
     // ------------------------------------------------------------------------
     
     /**
+     * Check if user is near the bottom of the chat (within 100px)
+     */
+    function isNearBottom() {
+        const threshold = 100;
+        return messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < threshold;
+    }
+
+    /**
+     * Smart scroll - only scroll to bottom if user hasn't scrolled up
+     */
+    function smartScrollToBottom() {
+        if (!userScrolledUp) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }
+
+    /**
+     * Track user scroll during bot response
+     */
+    messagesContainer.addEventListener('scroll', function() {
+        if (isLoading) {
+            userScrolledUp = !isNearBottom();
+        }
+    });
+
+    /**
      * Get recent message history (last 6 messages)
      */
     function getRecentHistory() {
@@ -540,7 +567,7 @@
     function showTypingIndicator() {
         messagesContainer.appendChild(typingIndicator);
         typingIndicator.style.display = 'flex';
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        smartScrollToBottom();
     }
 
     /**
@@ -661,7 +688,12 @@
         }
 
         messagesContainer.appendChild(messageWrapper);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        // Always scroll for user messages, smart scroll for bot messages
+        if (isUser) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } else {
+            smartScrollToBottom();
+        }
 
         messageHistory.push({ role: isUser ? 'user' : 'assistant', content });
     }
@@ -679,7 +711,9 @@
         chatInput.value = '';
         
         isLoading = true;
-        chatInput.disabled = true;
+        userScrolledUp = false; // Reset scroll tracking for new response
+        // Keep input enabled so user can type while bot generates
+        // chatInput.disabled = true;
         sendBtn.disabled = true;
         
         showTypingIndicator();
@@ -773,7 +807,7 @@
                                     botMessageDiv.textContent = streamingSanitized;
                                 }
                                 
-                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                smartScrollToBottom();
                             }
                             
                             
@@ -812,7 +846,8 @@
             addMessage('Συγγνώμη, προέκυψε ένα σφάλμα. Παρακαλώ δοκιμάστε ξανά.', false);
         } finally {
             isLoading = false;
-            chatInput.disabled = false;
+            userScrolledUp = false; // Reset scroll tracking
+            // chatInput.disabled = false; // Input stays enabled throughout
             sendBtn.disabled = false;
             chatInput.focus();
         }
