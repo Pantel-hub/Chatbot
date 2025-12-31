@@ -208,8 +208,8 @@ async function loadAvailableSlots() {
 		console.log("📅 Received slots:", slotsData);
 		console.log("📖 Booked appointments:", bookedData);
 
-		displayBookedAppointments(bookedData.appointments || []);
-		displayTimeSlots(slotsData.available_slots || []);
+		// Display unified view with both available and booked slots
+		displayUnifiedTimeSlots(slotsData.available_slots || [], bookedData.appointments || []);
 	} catch (error) {
 		console.error("❌ Error loading slots or appointments:", error);
 		slotsGrid.innerHTML = `
@@ -218,12 +218,90 @@ async function loadAvailableSlots() {
                 <br><small>Παρακαλώ δοκιμάστε ξανά</small>
             </div>
         `;
-		displayBookedAppointments([]); // Clear booked appointments on error
+		// Clear the booked appointments container if it exists
+		const bookedContainer = document.querySelector("#booked-appointments-container");
+		if (bookedContainer) bookedContainer.innerHTML = '';
 	}
 }
 
 /**
- * Εμφανίζει τα ήδη κλεισμένα ραντεβού για την ημερομηνία
+ * Εμφανίζει ενοποιημένη λίστα με διαθέσιμες και κλεισμένες ώρες
+ */
+function displayUnifiedTimeSlots(availableSlots, bookedAppointments) {
+	const slotsGrid = document.querySelector("#time-slots");
+	
+	// Clear the old booked appointments container if it exists
+	const bookedContainer = document.querySelector("#booked-appointments-container");
+	if (bookedContainer) bookedContainer.innerHTML = '';
+
+	// Create a map of all time slots (both available and booked)
+	const allSlots = [];
+	
+	// Add available slots
+	availableSlots.forEach(slot => {
+		allSlots.push({
+			start_time: slot.start_time,
+			end_time: slot.end_time,
+			datetime: slot.datetime,
+			isBooked: false,
+			summary: null
+		});
+	});
+	
+	// Add booked appointments
+	bookedAppointments.forEach(app => {
+		const timeStr = formatAppointmentTime(app.start, app.end);
+		const [start_time, end_time] = timeStr.split(' - ');
+		allSlots.push({
+			start_time: start_time,
+			end_time: end_time,
+			datetime: app.start,
+			isBooked: true,
+			summary: app.summary || 'Κλεισμένο'
+		});
+	});
+	
+	// Sort all slots by start time
+	allSlots.sort((a, b) => {
+		const timeA = a.start_time.replace(':', '');
+		const timeB = b.start_time.replace(':', '');
+		return parseInt(timeA) - parseInt(timeB);
+	});
+
+	if (allSlots.length === 0) {
+		slotsGrid.innerHTML =
+			'<div class="no-slots">Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημερομηνία</div>';
+		return;
+	}
+
+	slotsGrid.innerHTML = allSlots
+		.map(slot => {
+			if (slot.isBooked) {
+				return `
+					<button type="button" 
+							class="time-slot-btn booked-slot" 
+							disabled
+							title="${escapeHtml(slot.summary)}">
+						${slot.start_time} - ${slot.end_time}
+						<span class="booked-label">Κλεισμένο</span>
+					</button>
+				`;
+			} else {
+				return `
+					<button type="button" 
+							class="time-slot-btn" 
+							data-datetime="${slot.datetime}"
+							onclick="selectTimeSlot(this, '${slot.datetime}')">
+						${slot.start_time} - ${slot.end_time}
+					</button>
+				`;
+			}
+		})
+		.join("");
+}
+
+/**
+ * Εμφανίζει τα ήδη κλεισμένα ραντεβού για την ημερομηνία (legacy - kept for compatibility)
  */
 function displayBookedAppointments(appointments) {
 	let container = document.querySelector("#booked-appointments-container");
@@ -609,6 +687,29 @@ function addAppointmentStyles(primaryColor = "#4f46e5") {
             border-color: ${primaryColor};
             background: ${primaryColor};
             color: white;
+        }
+        
+        .time-slot-btn.booked-slot {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+            position: relative;
+            opacity: 0.7;
+        }
+        
+        .time-slot-btn.booked-slot:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .time-slot-btn.booked-slot .booked-label {
+            display: block;
+            font-size: 10px;
+            color: #ef4444;
+            font-weight: 600;
+            margin-top: 2px;
+            text-transform: uppercase;
         }
         
         .loading-slots, .no-slots, .error-message {
