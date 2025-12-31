@@ -153,13 +153,16 @@ export default function Deploy({
 		]
 	);
 
-	const widgetUrl = BASE_URL 
-		? `${BASE_URL}/api/public/widget.js?key=${apiKey}`
-		: `http://localhost:8000/api/public/widget.js?key=${apiKey}`;
+	// Build widget URL only if apiKey is available
+	const widgetUrl = apiKey 
+		? (BASE_URL 
+			? `${BASE_URL}/api/public/widget.js?key=${apiKey}`
+			: `http://localhost:8000/api/public/widget.js?key=${apiKey}`)
+		: null;
 	
-	const scriptSnippet =
-		widgetScript ||
-		`<script src="${widgetUrl}"></script>`;
+	// Use provided widgetScript or build from apiKey, show placeholder if neither available
+	const scriptSnippet = widgetScript 
+		|| (widgetUrl ? `<script src="${widgetUrl}"></script>` : "<!-- API Key not available yet -->");
 
 	const checklist = [
 		"Σωστή επιλογή χρώματος/θέματος",
@@ -169,11 +172,55 @@ export default function Deploy({
 	];
 
 	const onCopy = async (text, key) => {
+		if (!text) {
+			console.error('No text to copy');
+			return;
+		}
+		
+		const copyText = String(text);
+		
+		// Try using the modern Clipboard API first
+		if (navigator.clipboard && window.isSecureContext) {
+			try {
+				await navigator.clipboard.writeText(copyText);
+				setCopied(key);
+				setTimeout(() => setCopied(""), 1200);
+				return;
+			} catch (err) {
+				console.error('Clipboard API failed:', err);
+			}
+		}
+		
+		// Fallback method for older browsers or non-secure contexts
 		try {
-			await navigator.clipboard.writeText(text);
-			setCopied(key);
-			setTimeout(() => setCopied(""), 1200);
-		} catch {}
+			const textArea = document.createElement('textarea');
+			textArea.value = copyText;
+			textArea.style.position = 'fixed';
+			textArea.style.top = '0';
+			textArea.style.left = '0';
+			textArea.style.width = '2em';
+			textArea.style.height = '2em';
+			textArea.style.padding = '0';
+			textArea.style.border = 'none';
+			textArea.style.outline = 'none';
+			textArea.style.boxShadow = 'none';
+			textArea.style.background = 'transparent';
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+			
+			const successful = document.execCommand('copy');
+			document.body.removeChild(textArea);
+			
+			if (successful) {
+				setCopied(key);
+				setTimeout(() => setCopied(""), 1200);
+			} else {
+				console.error('execCommand copy failed');
+			}
+		} catch (fallbackErr) {
+			console.error('Fallback copy also failed:', fallbackErr);
+		}
 	};
 
 	const addDomain = () => {
@@ -290,15 +337,21 @@ export default function Deploy({
 						</div>
 						<div className="grid grid-cols-2 gap-3 text-sm">
 							<div className="text-slate-500">API Key</div>
-							<button
-								type="button"
-								onClick={() => onCopy(apiKey || "", "apikey")}
-								className="text-sm font-medium text-indigo-600 hover:text-indigo-800 underline cursor-pointer text-left"
-							>
-								{copied === "apikey"
-									? "Copied!"
-									: "Copy API Key"}
-							</button>
+							{apiKey ? (
+								<button
+									type="button"
+									onClick={() => onCopy(apiKey, "apikey")}
+									className="text-sm font-medium text-indigo-600 hover:text-indigo-800 underline cursor-pointer text-left disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{copied === "apikey"
+										? "Copied!"
+										: "Copy API Key"}
+								</button>
+							) : (
+								<span className="text-sm text-slate-400 italic">
+									Not available
+								</span>
+							)}
 							<div className="text-slate-500">Theme</div>
 							<div className="font-medium text-slate-800">
 								{theme}

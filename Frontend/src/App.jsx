@@ -12,7 +12,7 @@ import Contact from "./components/Contact";
 import OtpPage from "./components/OtpPage";
 import Dashboard from "./components/Dashboard";
 import PageTransition from "./components/PageTransition";
-import { API_ENDPOINTS } from "./config/api";
+import { API_ENDPOINTS, BASE_URL } from "./config/api";
 
 export default function App() {
 	const { t } = useTranslation();
@@ -45,10 +45,17 @@ export default function App() {
 
 	// --- Mobile steps dropdown state ---
 	const [showMobileSteps, setShowMobileSteps] = useState(false);
+	
+	// Track loaded edit data to prevent re-fetching on component remount
+	const loadedEditChatbotIdRef = React.useRef(null);
+	const [editInitialData, setEditInitialData] = useState(null);
 
 	// Παίρνει τις μεταφράσεις των βημάτων
 	const stepLabels = t("steps", { returnObjects: true }) || {};
 	const steps = Object.values(stepLabels);
+
+	// Track if we've just created a bot (to prevent reset)
+	const [botJustCreated, setBotJustCreated] = useState(false);
 
 	// Cleanup form state when navigating away from create/edit routes
 	useEffect(() => {
@@ -58,19 +65,54 @@ export default function App() {
 		if (!isFormRoute && !formSubmitted) {
 			setCurrentPage(0);
 			setMaxVisitedPage(0);
+			setBotJustCreated(false);
 			// Also reset form data when leaving
 			if (!editingChatbot && !apiKey) {
 				setFormData({});
 			}
 		}
 		
-		// Reset form when going to create-bot route from anywhere
-		if (location.pathname === "/create-bot" && !editingChatbot) {
+		// Reset form when going to create-bot route from anywhere - BUT NOT if we just created a bot
+		if (location.pathname === "/create-bot" && !editingChatbot && !botJustCreated) {
 			setFormData({});
 			setApiKey(null);
 			setWidgetScript(null);
+			// Reset edit data when creating new bot
+			loadedEditChatbotIdRef.current = null;
+			setEditInitialData(null);
 		}
-	}, [location.pathname, formSubmitted, editingChatbot, apiKey]);
+	}, [location.pathname, formSubmitted, editingChatbot, botJustCreated]);
+
+	// Fetch chatbot data when entering edit mode (only once per chatbot)
+	useEffect(() => {
+		const chatbotId = editingChatbot?.chatbot_id;
+		
+		if (chatbotId && loadedEditChatbotIdRef.current !== chatbotId) {
+			console.log("[App.jsx] 📥 Fetching edit data for chatbot:", chatbotId);
+			loadedEditChatbotIdRef.current = chatbotId;
+			
+			// Fetch the chatbot data
+			fetch(`${API_ENDPOINTS.getChatbot(chatbotId)}`, {
+				credentials: "include",
+			})
+				.then(res => {
+					if (!res.ok) throw new Error("Failed to fetch");
+					return res.json();
+				})
+				.then(bot => {
+					console.log("[App.jsx] ✅ Edit data loaded:", bot);
+					setEditInitialData(bot);
+					setApiKey(bot.api_key || "");
+					// Build widget script
+					const scriptValue = bot.script || (bot.api_key ? `<script src="${BASE_URL}/api/public/widget.js?key=${bot.api_key}"></script>` : "");
+					setWidgetScript(scriptValue);
+				})
+				.catch(err => {
+					console.error("[App.jsx] ❌ Failed to fetch edit data:", err);
+					loadedEditChatbotIdRef.current = null;
+				});
+		}
+	}, [editingChatbot?.chatbot_id]);
 
 	//όταν φορτώνει η σελίδα κάνει fetch στο endpoint checksession
 	useEffect(() => {
@@ -157,6 +199,9 @@ export default function App() {
 				responseData.chatbot_id
 			);
 
+			// Mark that we just created a bot (to prevent useEffect from resetting apiKey)
+			setBotJustCreated(true);
+			
 			setApiKey(responseData.api_key);
 			setWidgetScript(responseData.widget_script);
 			setActiveChatbotId(responseData.chatbot_id);
@@ -188,6 +233,9 @@ export default function App() {
 	};
 
 	const performUpdate = async (finalData, chatbotId) => {
+		console.log("[App.jsx] 🔄 performUpdate called");
+		console.log("[App.jsx] chatbotId:", chatbotId);
+		
 		let interval = null;
 		try {
 			setFormLoading(true);
@@ -198,6 +246,8 @@ export default function App() {
 				);
 			}, 700);
 
+			console.log("[App.jsx] 📤 Sending PUT request to:", `${API_ENDPOINTS.updateChatbot}/${chatbotId}`);
+			
 			const res = await fetch(
 				`${API_ENDPOINTS.updateChatbot}/${chatbotId}`,
 				{
@@ -206,7 +256,14 @@ export default function App() {
 					body: finalData,
 				}
 			);
-			if (!res.ok) throw new Error("update_chatbot failed");
+			
+			console.log("[App.jsx] 📥 Response status:", res.status);
+			
+			if (!res.ok) {
+				const errorText = await res.text();
+				console.error("[App.jsx] ❌ Update failed:", errorText);
+				throw new Error("update_chatbot failed: " + errorText);
+			}
 
 			clearInterval(interval);
 			setFormProgress(100);
@@ -233,7 +290,8 @@ export default function App() {
 				);
 
 				setCurrentPage(5); // Πηγαίνει στο Test tab (index 5 = 6ο βήμα)
-				setEditingChatbot(null); // Καθαρίζει το edit mode flag
+				// Keep editingChatbot so user can navigate back to earlier steps
+				// It will be cleared when going to dashboard
 
 				setFormLoading(false);
 				setFormProgress(null);
@@ -249,8 +307,12 @@ export default function App() {
 
 	//
 	const handleFormSubmit = async (finalData) => {
+		console.log("[App.jsx] 📥 handleFormSubmit called");
+		console.log("[App.jsx] editingChatbot:", editingChatbot);
+		
 		if (editingChatbot) {
 			// Edit mode → UPDATE (PUT), χωρίς OTP
+			console.log("[App.jsx] ✏️ Edit mode - calling performUpdate");
 			await performUpdate(finalData, editingChatbot.chatbot_id);
 			return;
 		}
@@ -322,6 +384,8 @@ export default function App() {
 	const handleGoToDashboard = () => {
 		setEditingChatbot(null);
 		setActiveChatbotId(null);
+		setBotJustCreated(false); // Reset when going to dashboard
+		loadedEditChatbotIdRef.current = null; // Reset so next edit will fetch fresh data
 		navigate("/dashboard");
 	};
 
@@ -329,6 +393,7 @@ export default function App() {
 		// Καθαρίζει το edit mode
 		setEditingChatbot(null);
 		setActiveChatbotId(null);
+		setBotJustCreated(false); // Reset when creating new bot
 
 		// Νέο bot ⇒ καθαρά κλειδιά
 		setApiKey("");
@@ -475,6 +540,7 @@ export default function App() {
 							setShowOtpModal={setShowOtpModal}
 							performRealSubmit={performRealSubmit}
 							pendingFormData={pendingFormData}
+							editInitialData={null}
 						/>
 					}
 				/>
@@ -513,6 +579,7 @@ export default function App() {
 								setShowOtpModal={setShowOtpModal}
 								performRealSubmit={performRealSubmit}
 								pendingFormData={pendingFormData}
+								editInitialData={editInitialData}
 							/>
 						</ProtectedRoute>
 					}
@@ -556,6 +623,7 @@ function FormPageWrapper({
 	setShowOtpModal,
 	performRealSubmit,
 	pendingFormData,
+	editInitialData,
 }) {
 	return (
 		<>
@@ -666,7 +734,6 @@ function FormPageWrapper({
 								) : (
 									<div className="w-full pt-4 lg:pt-0">
 										<FormSteps
-											key={String(activeChatbotId ?? "create")}
 											currentPage={currentPage}
 											steps={steps}
 											onNext={handleNext}
@@ -677,6 +744,7 @@ function FormPageWrapper({
 											apiKey={apiKey}
 											widgetScript={widgetScript}
 											inheritedFormData={formData}
+											initialData={editInitialData}
 											editMode={editingChatbot}
 											activeChatbotId={activeChatbotId}
 											setApiKey={setApiKey}
